@@ -1,0 +1,8 @@
+{
+  "appId": "com.savash.game",
+  "appName": "Savash",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
