@@ -21,7 +21,7 @@ button{color:#fff;background:#172631eF;border:1px solid #ffffff66;border-radius:
 #fire{position:fixed;right:18px;bottom:28px;width:84px;height:84px;border-radius:50%;background:linear-gradient(145deg,#ef5555,#8e2020);font-size:16px;z-index:3;box-shadow:0 5px 18px #0008}
 #topButtons{position:fixed;right:12px;top:65px;z-index:3;display:flex;gap:7px}
 #topButtons button{padding:8px 11px;font-size:11px}
-.overlay{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(#0710189c,#071018e8),url('savash-bg.png') center/cover no-repeat}
+.overlay{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(#0710189c,#071018e8),url('savash-bg.jpg') center/cover no-repeat}
 .panel{width:min(420px,100%);padding:26px 22px;border:1px solid #ffffff40;border-radius:22px;background:#101820ed;box-shadow:0 20px 60px #0009;text-align:center}
 .logo{font-size:42px;font-weight:1000;letter-spacing:5px;color:var(--gold);text-shadow:0 4px 20px #000}
 .subtitle{color:#c7d0d5;margin:8px 0 22px;font-size:13px;line-height:1.5}
@@ -44,7 +44,7 @@ button{color:#fff;background:#172631eF;border:1px solid #ffffff66;border-radius:
  <span class="hudItem" id="squad">SQUAD 5/5</span>
 </div>
 <div id="mission" class="hidden">MISSION: ELIMINATE ALL ENEMIES</div>
-<div id="topButtons" class="hidden"><button id="pauseBtn">Ⅱ PAUSE</button></div>
+<div id="topButtons" class="hidden"><button id="musicBtn">♫ MUSIC ON</button><button id="pauseBtn">Ⅱ PAUSE</button></div>
 <div id="pad" class="hidden">
  <button data-d="up" style="grid-area:1/2">▲</button><button data-d="left" style="grid-area:2/1">◀</button>
  <button data-d="down" style="grid-area:3/2">▼</button><button data-d="right" style="grid-area:2/3">▶</button>
@@ -56,6 +56,7 @@ button{color:#fff;background:#172631eF;border:1px solid #ffffff66;border-radius:
   <div class="subtitle">SQUAD COMBAT<br>Lead your five-soldier team through 20 increasingly difficult battle waves.</div>
   <button class="primary" id="startBtn">START MISSION</button>
   <button class="secondary" id="howBtn">HOW TO PLAY</button>
+  <button class="secondary" id="musicMenuBtn">♫ MUSIC: ON</button>
   <div class="small">Move with the directional pad or WASD / arrow keys. Hold FIRE to attack the nearest enemy. Your squad covers you automatically.</div>
  </div>
 </section>
@@ -70,11 +71,13 @@ button{color:#fff;background:#172631eF;border:1px solid #ffffff66;border-radius:
 <script>
 (()=>{
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),$=id=>document.getElementById(id);
-const bg=new Image();bg.src='savash-bg.png';
+const bg=new Image();bg.src='savash-bg.jpg';
 let W=0,H=0,D=1,player,team=[],enemies=[],bullets=[],keys={},touch={};
 let wave=1,kills=0,firing=false,mode='menu',last=0,transition=0;
+let audioCtx=null,musicGain=null,musicTimer=null,musicOn=false,musicStep=0;
 const MAX_WAVE=20;
 function resize(){D=Math.min(devicePixelRatio||1,2);W=canvas.clientWidth;H=canvas.clientHeight;canvas.width=W*D;canvas.height=H*D;ctx.setTransform(D,0,0,D,0,0)}
+function startMusic(){try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;if(!audioCtx){audioCtx=new AC();musicGain=audioCtx.createGain();musicGain.gain.value=0.0001;musicGain.connect(audioCtx.destination);const low=audioCtx.createBiquadFilter();low.type='lowpass';low.frequency.value=420;const drone=audioCtx.createOscillator();drone.type='sawtooth';drone.frequency.value=55;const droneGain=audioCtx.createGain();droneGain.gain.value=.12;drone.connect(low);low.connect(droneGain);droneGain.connect(musicGain);drone.start();const fifth=audioCtx.createOscillator();fifth.type='sine';fifth.frequency.value=82.41;const fifthGain=audioCtx.createGain();fifthGain.gain.value=.07;fifth.connect(fifthGain);fifthGain.connect(musicGain);fifth.start();}audioCtx.resume();musicOn=true;musicGain.gain.cancelScheduledValues(audioCtx.currentTime);musicGain.gain.setTargetAtTime(.34,audioCtx.currentTime,.8);if(!musicTimer){const notes=[110,130.81,146.83,98,123.47,110,164.81,130.81];musicTimer=setInterval(()=>{if(!musicOn||!audioCtx)return;const now=audioCtx.currentTime;const o=audioCtx.createOscillator(),g=audioCtx.createGain(),f=audioCtx.createBiquadFilter();o.type='sine';o.frequency.value=notes[musicStep++%notes.length];f.type='lowpass';f.frequency.value=700;o.connect(f);f.connect(g);g.connect(musicGain);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.16,now+.18);g.gain.exponentialRampToValueAtTime(.0001,now+2.4);o.start(now);o.stop(now+2.5)},1900)}$('musicBtn').textContent='♫ MUSIC ON';$('musicMenuBtn').textContent='♫ MUSIC: ON'}catch(e){}}function stopMusic(){musicOn=false;if(audioCtx&&musicGain)musicGain.gain.setTargetAtTime(.0001,audioCtx.currentTime,.25);$('musicBtn').textContent='♫ MUSIC OFF';$('musicMenuBtn').textContent='♫ MUSIC: OFF'}function toggleMusic(){if(musicOn)stopMusic();else startMusic()}
 function showGameUI(on){['hud','mission','topButtons','pad','fire'].forEach(id=>$(id).classList.toggle('hidden',!on))}
 function menu(){mode='menu';showGameUI(false);$('start').classList.remove('hidden');$('how').classList.add('hidden');$('result').classList.add('hidden');$('pause').classList.add('hidden')}
 function beginWave(){player={x:W/2,y:H*.58,hp:100,cd:0};team=Array.from({length:5},(_,i)=>({x:W/2+(i-2)*25,y:H*.58+48,hp:100,cd:.2}));enemies=[];bullets=[];firing=false;mode='playing';transition=0;const count=4+wave*2;for(let i=0;i<count;i++)spawn(i===count-1&&wave%5===0);$('result').classList.add('hidden');$('pause').classList.add('hidden');$('start').classList.add('hidden');showGameUI(true);hud()}
@@ -101,11 +104,11 @@ function loop(t){let dt=Math.min(.04,(t-last)/1000||0);last=t;update(dt);draw();
 addEventListener('keydown',e=>{keys[e.key]=true;if(e.key.startsWith('Arrow'))e.preventDefault();if(e.key==='Escape'&&mode==='playing')pause()});addEventListener('keyup',e=>keys[e.key]=false);
 document.querySelectorAll('#pad button').forEach(b=>{let d=b.dataset.d;b.addEventListener('pointerdown',e=>{e.preventDefault();touch[d]=true;b.setPointerCapture(e.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(v=>b.addEventListener(v,()=>touch[d]=false))});
 $('fire').addEventListener('pointerdown',e=>{e.preventDefault();firing=true;$('fire').setPointerCapture(e.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(v=>$('fire').addEventListener(v,()=>firing=false));
-function pause(){if(mode!=='playing')return;mode='paused';firing=false;$('pause').classList.remove('hidden')}
-function startMission(e){if(e){e.preventDefault();e.stopPropagation()}if(mode==='playing')return;wave=1;kills=0;beginWave()}
+function pause(){if(mode!=='playing')return;mode='paused';firing=false;stopMusic();$('pause').classList.remove('hidden')}
+function startMission(e){if(e){e.preventDefault();e.stopPropagation()}if(mode==='playing')return;startMusic();wave=1;kills=0;beginWave()}
 const startButton=$('startBtn');
 if(startButton){startButton.addEventListener('click',startMission);startButton.addEventListener('pointerup',e=>{if(e.pointerType==='touch')startMission(e)})}
-document.querySelectorAll('button').forEach(b=>{if(/DEPLOY TO BATTLE/i.test(b.textContent||'')){b.addEventListener('click',startMission);b.addEventListener('pointerup',e=>{if(e.pointerType==='touch')startMission(e)})}});$('howBtn').onclick=()=>$('how').classList.remove('hidden');$('backBtn').onclick=()=>$('how').classList.add('hidden');$('pauseBtn').onclick=pause;$('resumeBtn').onclick=()=>{$('pause').classList.add('hidden');mode='playing'};$('quitBtn').onclick=menu;$('menuBtn').onclick=menu;$('nextBtn').onclick=()=>{if(wave<MAX_WAVE){wave++;beginWave()}else menu()};
+document.querySelectorAll('button').forEach(b=>{if(/DEPLOY TO BATTLE/i.test(b.textContent||'')){b.addEventListener('click',startMission);b.addEventListener('pointerup',e=>{if(e.pointerType==='touch')startMission(e)})}});$('musicBtn').onclick=toggleMusic;$('musicMenuBtn').onclick=toggleMusic;$('howBtn').onclick=()=>$('how').classList.remove('hidden');$('backBtn').onclick=()=>$('how').classList.add('hidden');$('pauseBtn').onclick=pause;$('resumeBtn').onclick=()=>{$('pause').classList.add('hidden');mode='playing';startMusic()};$('quitBtn').onclick=menu;$('menuBtn').onclick=menu;$('nextBtn').onclick=()=>{if(wave<MAX_WAVE){wave++;beginWave()}else menu()};
 addEventListener('resize',()=>{resize();if(player){player.x=Math.min(W-15,Math.max(15,player.x));player.y=Math.min(H-15,Math.max(65,player.y))}});
 resize();menu();requestAnimationFrame(loop);
 })();
