@@ -69,6 +69,7 @@
   }
 
   function startCampaign() {
+    if (mode === "playing") return;
     wave = 1;
     kills = 0;
     onlineMode = false;
@@ -429,7 +430,17 @@
     requestAnimationFrame(frame);
   }
 
-  $("startBtn").addEventListener("click", startCampaign);
+  function startMission(event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    startCampaign();
+  }
+  $("startBtn").addEventListener("click", startMission);
+  $("startBtn").addEventListener("pointerup", event => {
+    if (event.pointerType === "touch") startMission(event);
+  });
   $("howBtn").addEventListener("click", () => $("how").classList.remove("hidden"));
   $("backBtn").addEventListener("click", () => $("how").classList.add("hidden"));
   $("pauseBtn").addEventListener("click", pauseGame);
