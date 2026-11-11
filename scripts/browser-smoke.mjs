@@ -47,7 +47,7 @@ try {
 
   await page.goto("http://127.0.0.1:4173/", { waitUntil: "load" });
   await page.locator("#startBtn").waitFor({ state: "visible" });
-  await page.locator("#startBtn").click();
+  await page.locator("#startBtn").tap();
   await page.waitForFunction(() =>
     document.getElementById("start").classList.contains("hidden") &&
     !document.getElementById("hud").classList.contains("hidden")
