@@ -186,7 +186,7 @@
       localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
     }
     peer.onicecandidate = event => {
-      if (event.candidate) {
+      if (event.candidate && event.candidate.candidate) {
         sendSignal({ type: "ice-candidate", candidate: event.candidate.toJSON ? event.candidate.toJSON() : event.candidate });
       }
     };
