@@ -42,6 +42,10 @@ jobs:
           java-version: "21"
       - name: Install dependencies
         run: npm install
+      - name: Install Chromium for browser smoke test
+        run: npx playwright install --with-deps chromium
+      - name: Run mobile browser smoke test
+        run: npm run test:browser
       - name: Prepare complete game assets
         run: |
           mkdir -p www
