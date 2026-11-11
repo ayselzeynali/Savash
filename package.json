@@ -4,13 +4,16 @@
   "private": true,
   "description": "Android wrapper for the Savash squad combat game",
   "scripts": {
-    "android:sync": "cap sync android"
+    "android:sync": "cap sync android",
+    "check": "node --check config.js && node --check multiplayer.js && node --check game.js && node --check scripts/browser-smoke.mjs && node --input-type=module --check < server/worker.js && node scripts/check-assets.mjs",
+    "test:browser": "node scripts/browser-smoke.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
     "@capacitor/core": "^7.4.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.4.3"
+    "@capacitor/cli": "^7.4.3",
+    "playwright": "^1.56.1"
   }
 }
