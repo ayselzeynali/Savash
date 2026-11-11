@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#101820">
+<meta name="theme-color" content="#101820">\n<link rel="manifest" href="manifest.webmanifest">
 <title>SAVASH — Squad Combat</title>
 <style>
 :root{--panel:#101b25eF;--line:#ffffff35;--gold:#f5c451;--red:#e24b4b}
@@ -107,5 +107,5 @@ addEventListener('resize',()=>{resize();if(player){player.x=Math.min(W-15,Math.m
 resize();menu();requestAnimationFrame(loop);
 })();
 </script>
-</body>
+<script>if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {})); }</script>\n</body>
 </html>
