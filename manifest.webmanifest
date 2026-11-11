@@ -1,0 +1,11 @@
+{
+  "name": "SAVASH — Squad Combat",
+  "short_name": "Savash",
+  "description": "Lead your five-soldier team through 20 battle waves.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#101820",
+  "theme_color": "#101820"
+}
