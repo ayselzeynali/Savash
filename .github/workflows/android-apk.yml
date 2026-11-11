@@ -3,20 +3,28 @@ name: Build Savash Android APK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, "fix/**"]
     paths:
       - "index.html"
+      - "config.js"
+      - "game.js"
+      - "multiplayer.js"
       - "package.json"
       - "capacitor.config.json"
       - "manifest.webmanifest"
       - "sw.js"
+      - "file_00000000d45c81f48ba3ab6d5282ec87.png"
+      - "scripts/**"
+      - "server/**"
       - ".github/workflows/android-apk.yml"
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  validate-and-build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -25,6 +33,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Validate game scripts and assets
+        run: npm run check
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -32,13 +42,10 @@ jobs:
           java-version: "21"
       - name: Install dependencies
         run: npm install
-      - name: Prepare game assets
+      - name: Prepare complete game assets
         run: |
           mkdir -p www
-          cp index.html www/index.html
-          cp manifest.webmanifest www/manifest.webmanifest
-          cp file_00000000d45c81f48ba3ab6d5282ec87.png www/savash-bg.png
-          cp sw.js www/sw.js
+          cp index.html config.js multiplayer.js game.js manifest.webmanifest sw.js file_00000000d45c81f48ba3ab6d5282ec87.png www/
       - name: Generate Android project
         run: npx cap add android
       - name: Sync Capacitor
