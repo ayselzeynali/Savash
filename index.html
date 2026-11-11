@@ -86,15 +86,16 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 <section id="online" class="overlay hidden">
  <div class="panel">
   <h2>ONLINE DUEL + VOICE</h2>
-  <p class="subtitle">Create a private room code and share it with one friend. This prototype shares player position and peer-to-peer voice; each player's enemies and score are still local.</p>
+  <p class="subtitle">When the signaling server is configured, create a private 8-character room code and share it with one friend. The duel exchanges player position, hits and peer-to-peer voice; there is no public matchmaking.</p>
   <label class="small" for="roomCode">ROOM CODE — 8 CHARACTERS</label>
   <input id="roomCode" type="text" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCDEFGH">
   <button class="primary" id="createRoomBtn" type="button">CREATE ROOM</button>
   <button class="secondary" id="joinRoomBtn" type="button">JOIN ROOM</button>
   <button class="secondary" id="muteBtn" type="button" disabled>MICROPHONE UNAVAILABLE</button>
+  <button class="primary" id="startOnlineBtn" type="button" disabled>WAITING FOR PLAYER...</button>
   <button class="secondary" id="disconnectBtn" type="button" disabled>DISCONNECT</button>
   <p id="onlineStatus" role="status" aria-live="polite">Online play is not configured. The offline campaign is ready.</p>
-  <p class="onlineNote">Real online play needs the SAVASH signaling worker deployed over HTTPS/WSS. Voice needs microphone permission and may also need a TURN relay. No fake connection is shown when the server is missing.</p>
+  <p class="onlineNote">The signaling Worker only exchanges WebRTC setup messages. Duel state and voice travel peer-to-peer. The Worker must be deployed over HTTPS/WSS; microphone permission is required for voice, and some networks also need a TURN relay.</p>
   <button class="secondary" id="onlineBackBtn" type="button">BACK TO MENU</button>
  </div>
 </section>
