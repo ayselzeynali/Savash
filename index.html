@@ -21,7 +21,7 @@ button{color:#fff;background:#172631eF;border:1px solid #ffffff66;border-radius:
 #fire{position:fixed;right:18px;bottom:28px;width:84px;height:84px;border-radius:50%;background:linear-gradient(145deg,#ef5555,#8e2020);font-size:16px;z-index:3;box-shadow:0 5px 18px #0008}
 #topButtons{position:fixed;right:12px;top:65px;z-index:3;display:flex;gap:7px}
 #topButtons button{padding:8px 11px;font-size:11px}
-.overlay{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(#0710189c,#071018e8),url('https://raw.githubusercontent.com/ayselzeynali/Savash/main/file_00000000d45c81f48ba3ab6d5282ec87.png') center/cover no-repeat}
+.overlay{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(#0710189c,#071018e8),url('savash-bg.png') center/cover no-repeat}
 .panel{width:min(420px,100%);padding:26px 22px;border:1px solid #ffffff40;border-radius:22px;background:#101820ed;box-shadow:0 20px 60px #0009;text-align:center}
 .logo{font-size:42px;font-weight:1000;letter-spacing:5px;color:var(--gold);text-shadow:0 4px 20px #000}
 .subtitle{color:#c7d0d5;margin:8px 0 22px;font-size:13px;line-height:1.5}
@@ -70,7 +70,7 @@ button{color:#fff;background:#172631eF;border:1px solid #ffffff66;border-radius:
 <script>
 (()=>{
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),$=id=>document.getElementById(id);
-const bg=new Image();bg.src='https://raw.githubusercontent.com/ayselzeynali/Savash/main/file_00000000d45c81f48ba3ab6d5282ec87.png';
+const bg=new Image();bg.src='savash-bg.png';
 let W=0,H=0,D=1,player,team=[],enemies=[],bullets=[],keys={},touch={};
 let wave=1,kills=0,firing=false,mode='menu',last=0,transition=0;
 const MAX_WAVE=20;
@@ -102,7 +102,10 @@ addEventListener('keydown',e=>{keys[e.key]=true;if(e.key.startsWith('Arrow'))e.p
 document.querySelectorAll('#pad button').forEach(b=>{let d=b.dataset.d;b.addEventListener('pointerdown',e=>{e.preventDefault();touch[d]=true;b.setPointerCapture(e.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(v=>b.addEventListener(v,()=>touch[d]=false))});
 $('fire').addEventListener('pointerdown',e=>{e.preventDefault();firing=true;$('fire').setPointerCapture(e.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(v=>$('fire').addEventListener(v,()=>firing=false));
 function pause(){if(mode!=='playing')return;mode='paused';firing=false;$('pause').classList.remove('hidden')}
-$('startBtn').onclick=()=>{wave=1;kills=0;beginWave()};$('howBtn').onclick=()=>$('how').classList.remove('hidden');$('backBtn').onclick=()=>$('how').classList.add('hidden');$('pauseBtn').onclick=pause;$('resumeBtn').onclick=()=>{$('pause').classList.add('hidden');mode='playing'};$('quitBtn').onclick=menu;$('menuBtn').onclick=menu;$('nextBtn').onclick=()=>{if(wave<MAX_WAVE){wave++;beginWave()}else menu()};
+function startMission(e){if(e){e.preventDefault();e.stopPropagation()}if(mode==='playing')return;wave=1;kills=0;beginWave()}
+const startButton=$('startBtn');
+if(startButton){startButton.addEventListener('click',startMission);startButton.addEventListener('pointerup',e=>{if(e.pointerType==='touch')startMission(e)})}
+document.querySelectorAll('button').forEach(b=>{if(/DEPLOY TO BATTLE/i.test(b.textContent||'')){b.addEventListener('click',startMission);b.addEventListener('pointerup',e=>{if(e.pointerType==='touch')startMission(e)})}});$('howBtn').onclick=()=>$('how').classList.remove('hidden');$('backBtn').onclick=()=>$('how').classList.add('hidden');$('pauseBtn').onclick=pause;$('resumeBtn').onclick=()=>{$('pause').classList.add('hidden');mode='playing'};$('quitBtn').onclick=menu;$('menuBtn').onclick=menu;$('nextBtn').onclick=()=>{if(wave<MAX_WAVE){wave++;beginWave()}else menu()};
 addEventListener('resize',()=>{resize();if(player){player.x=Math.min(W-15,Math.max(15,player.x));player.y=Math.min(H-15,Math.max(65,player.y))}});
 resize();menu();requestAnimationFrame(loop);
 })();
