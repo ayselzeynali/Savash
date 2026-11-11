@@ -104,7 +104,6 @@ export class Room {
     })();
 
     if (message.type === "leave") {
-      this.broadcast(socket, { type: "peer-left" });
       try { socket.close(1000, "Player left"); } catch (_) {}
       return;
     }
