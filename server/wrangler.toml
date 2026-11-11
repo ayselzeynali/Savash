@@ -1,0 +1,17 @@
+name = "savash-signaling"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+# Replace the example origin(s) with the exact HTTPS app origin.
+# Capacitor Android normally uses https://localhost.
+[vars]
+ALLOWED_ORIGINS = "https://YOUR-APP-DOMAIN,https://localhost"
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]
