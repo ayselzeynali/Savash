@@ -21,7 +21,7 @@ button{color:#fff;background:#172631eF;border:1px solid #ffffff66;border-radius:
 #fire{position:fixed;right:18px;bottom:28px;width:84px;height:84px;border-radius:50%;background:linear-gradient(145deg,#ef5555,#8e2020);font-size:16px;z-index:3;box-shadow:0 5px 18px #0008}
 #topButtons{position:fixed;right:12px;top:65px;z-index:3;display:flex;gap:7px}
 #topButtons button{padding:8px 11px;font-size:11px}
-.overlay{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(#0710189c,#071018e8),url('savash-bg.jpg') center/cover no-repeat}
+.overlay{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(#07101855,#07101899),url('savash-bg.jpg') center/cover no-repeat}
 .panel{width:min(420px,100%);padding:26px 22px;border:1px solid #ffffff40;border-radius:22px;background:#101820ed;box-shadow:0 20px 60px #0009;text-align:center}
 .logo{font-size:42px;font-weight:1000;letter-spacing:5px;color:var(--gold);text-shadow:0 4px 20px #000}
 .subtitle{color:#c7d0d5;margin:8px 0 22px;font-size:13px;line-height:1.5}
@@ -97,8 +97,8 @@ let old=enemies.length;enemies=enemies.filter(e=>e.hp>0);kills+=old-enemies.leng
 if(player.hp<=0){player.hp=0;finish(false);return}
 if(enemies.length===0){finish(true);return}hud()}
 function soldier(a,color,scale=1){ctx.save();ctx.translate(a.x,a.y);ctx.scale(scale,scale);ctx.fillStyle='#17212a';ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);ctx.fill();ctx.fillStyle=color;ctx.fillRect(-8,-4,16,18);ctx.fillStyle='#d8b28a';ctx.beginPath();ctx.arc(0,-10,6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#222';ctx.fillRect(4,2,17,3);ctx.restore()}
-function draw(){ctx.clearRect(0,0,W,H);if(bg.complete&&bg.naturalWidth){let scale=Math.max(W/bg.width,H/bg.height),sw=W/scale,sh=H/scale;ctx.globalAlpha=.48;ctx.drawImage(bg,(bg.width-sw)/2,(bg.height-sh)/2,sw,sh,0,0,W,H);ctx.globalAlpha=1}else{ctx.fillStyle='#526341';ctx.fillRect(0,0,W,H)}
-ctx.fillStyle='#15251c66';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#ffffff12';for(let x=0;x<W;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+function draw(){ctx.clearRect(0,0,W,H);if(bg.complete&&bg.naturalWidth){let scale=Math.max(W/bg.width,H/bg.height),sw=W/scale,sh=H/scale;ctx.globalAlpha=.92;ctx.drawImage(bg,(bg.width-sw)/2,(bg.height-sh)/2,sw,sh,0,0,W,H);ctx.globalAlpha=1}else{ctx.fillStyle='#526341';ctx.fillRect(0,0,W,H)}
+ctx.fillStyle='#15251c22';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#ffffff12';for(let x=0;x<W;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
 if(mode==='playing'||mode==='result'||mode==='paused'){team.forEach(s=>{if(s.hp>0)soldier(s,'#4e9a54',.86)});soldier(player,'#2f75c8',1.2);enemies.forEach(e=>{soldier(e,e.boss?'#711b25':'#a93636',e.boss?1.45:1);ctx.fillStyle='#222';ctx.fillRect(e.x-15,e.y-27,30,4);ctx.fillStyle=e.boss?'#ffb13b':'#ef4444';ctx.fillRect(e.x-15,e.y-27,30*Math.max(0,e.hp/e.max),4);if(e.boss){ctx.fillStyle='#fff';ctx.font='10px Arial';ctx.textAlign='center';ctx.fillText('BOSS',e.x,e.y-34)}});bullets.forEach(b=>{ctx.fillStyle='#ffe066';ctx.beginPath();ctx.arc(b.x,b.y,4,0,Math.PI*2);ctx.fill()})}}
 function loop(t){let dt=Math.min(.04,(t-last)/1000||0);last=t;update(dt);draw();requestAnimationFrame(loop)}
 addEventListener('keydown',e=>{keys[e.key]=true;if(e.key.startsWith('Arrow'))e.preventDefault();if(e.key==='Escape'&&mode==='playing')pause()});addEventListener('keyup',e=>keys[e.key]=false);
