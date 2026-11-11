@@ -37,6 +37,7 @@ jobs:
           mkdir -p www
           cp index.html www/index.html
           cp manifest.webmanifest www/manifest.webmanifest
+          cp file_00000000d45c81f48ba3ab6d5282ec87.png www/savash-bg.png
           cp sw.js www/sw.js
       - name: Generate Android project
         run: npx cap add android
