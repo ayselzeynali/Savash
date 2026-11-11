@@ -179,7 +179,9 @@
     if (mode !== "playing") return;
     mode = "result";
     clearInput();
-    if (onlineMode && net()) net().disconnect();
+    if (onlineMode && net()) {
+      net().sendGameState({ x: player.x / W, y: player.y / H, hp: player.hp, firing: false });
+    }
     showGameUI(false);
     $("result").classList.remove("hidden");
     $("resultTitle").textContent = onlineMode
