@@ -10,6 +10,7 @@ on:
       - "capacitor.config.json"
       - "manifest.webmanifest"
       - "sw.js"
+      - "assets/savash-bg.jpg.b64"
       - ".github/workflows/android-apk.yml"
 
 permissions:
@@ -37,7 +38,7 @@ jobs:
           mkdir -p www
           cp index.html www/index.html
           cp manifest.webmanifest www/manifest.webmanifest
-          cp file_00000000d45c81f48ba3ab6d5282ec87.png www/savash-bg.png
+          base64 -d assets/savash-bg.jpg.b64 > www/savash-bg.jpg
           cp sw.js www/sw.js
       - name: Generate Android project
         run: npx cap add android
