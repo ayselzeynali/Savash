@@ -8,7 +8,7 @@
 <title>SAVASH — Squad Combat</title>
 <style>
 :root{--panel:#101b25eF;--line:#ffffff35;--gold:#f5c451;--red:#e24b4b}
-*{box-sizing:border-box}
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101820;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100dvh;background:#34452e;touch-action:none}
 #hud{position:fixed;top:0;left:0;right:0;min-height:54px;padding:7px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:#101820eF;border-bottom:1px solid var(--line);z-index:2;font-size:12px;font-weight:800;letter-spacing:.5px}
@@ -19,7 +19,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101820;col
 #pad{position:fixed;left:14px;bottom:18px;display:grid;grid-template:repeat(3,48px)/repeat(3,48px);gap:4px;z-index:3}
 button{color:#fff;background:#172631eF;border:1px solid #ffffff66;border-radius:12px;font-weight:800;touch-action:none}
 #pad button{font-size:22px}
-#fire{position:fixed;right:18px;bottom:28px;width:84px;height:84px;border-radius:50%;background:linear-gradient(145deg,#ef5555,#8e2020);font-size:16px;z-index:3;box-shadow:0 5px 18px #0008}
+#fire{position:fixed;right:18px;bottom:28px;width:84px;height:84px;border-radius:50%;background:linear-gradient(145deg,#ef5555,#8e2020);font-size:16px;z-index:3;box-shadow:0 5px 18px #0008;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 #topButtons{position:fixed;right:12px;top:65px;z-index:3;display:flex;gap:7px}
 #topButtons button{padding:8px 11px;font-size:11px}
 .overlay{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(#07101855,#07101899),url('savash-bg.jpg') center/cover no-repeat}
@@ -107,7 +107,7 @@ if(mode==='playing'||mode==='result'||mode==='paused'){team.forEach(s=>{if(s.hp>
 function loop(t){let dt=Math.min(.04,(t-last)/1000||0);last=t;update(dt);draw();requestAnimationFrame(loop)}
 addEventListener('keydown',e=>{keys[e.key]=true;if(e.key.startsWith('Arrow'))e.preventDefault();if(e.key==='Escape'&&mode==='playing')pause()});addEventListener('keyup',e=>keys[e.key]=false);
 document.querySelectorAll('#pad button').forEach(b=>{let d=b.dataset.d;b.addEventListener('pointerdown',e=>{e.preventDefault();touch[d]=true;b.setPointerCapture(e.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(v=>b.addEventListener(v,()=>touch[d]=false))});
-$('fire').addEventListener('pointerdown',e=>{e.preventDefault();firing=true;$('fire').setPointerCapture(e.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(v=>$('fire').addEventListener(v,()=>firing=false));
+$('fire').addEventListener('contextmenu',e=>{e.preventDefault();e.stopPropagation()});$('fire').addEventListener('selectstart',e=>{e.preventDefault();e.stopPropagation()});$('fire').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();firing=true;try{$('fire').setPointerCapture(e.pointerId)}catch(_){}});['pointerup','pointercancel','lostpointercapture'].forEach(v=>$('fire').addEventListener(v,e=>{if(e){e.preventDefault();e.stopPropagation()}firing=false}));
 function pause(){if(mode!=='playing')return;mode='paused';firing=false;stopMusic();$('pause').classList.remove('hidden')}
 function startMission(e){if(e){e.preventDefault();e.stopPropagation()}if(mode==='playing')return;startMusic();wave=1;kills=0;beginWave()}
 const startButton=$('startBtn');
