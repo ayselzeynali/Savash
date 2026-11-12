@@ -30,3 +30,8 @@ This repository folder is the project foundation and mobile UI prototype. It is 
 ## Structure
 - `prototype/`: mobile-first concept interface
 - `docs/`: technical and product planning (to be expanded)
+
+## Seller-direct payments
+- Marketplace checkout is designed so each participating seller receives their sale through a payment provider's approved split-settlement / multi-beneficiary feature; TABRIZ WORLD receives only its disclosed commission when supported.
+- Bank logos in the prototype are placeholders, not live payment integrations. Direct seller settlement must be confirmed in the provider's current contract and API before enabling a gateway.
+- See [`docs/SELLER-DIRECT-PAYMENTS.md`](docs/SELLER-DIRECT-PAYMENTS.md) for the payment flow, security controls, and provider constraints.
