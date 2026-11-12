@@ -27,7 +27,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:right;
 <body>
 <header><div class="brand">TABRIZ <span>WORLD</span><div class="muted">پنل مدیریت فروشندگان</div></div><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><a href="text-chat.html">💬 پیام‌های مشتریان</a><a href="index.html">بازگشت به شهر ←</a></div></header>
 <main>
-<section class="intro"><span class="tag">نسخه آزمایشی پنل فروشنده</span><h1>فروشگاهت را در شهر مجازی تبریز مدیریت کن</h1><p>اطلاعات فروشگاه، کالاها و سفارش‌ها را در یک محیط واحد مدیریت کن. این نسخه فعلاً نمونه نمایشی است و اطلاعات را به سرور یا بانک متصل نمی‌کند.</p></section>
+<section class="intro"><span class="tag">اتصال ابری محصولات</span><h1>فروشگاهت را در شهر مجازی تبریز مدیریت کن</h1><p>با ورود پیامکی، محصولات و تصاویر آن‌ها در Supabase ذخیره می‌شوند و برای بررسی مدیریت ارسال می‌شوند. بخش سفارش‌ها و تسویه بانکی هنوز به درگاه واقعی متصل نیست.</p></section>
 
 <section class="item" id="cloudAuth" style="margin:16px 0">
   <h3 style="margin-top:0">حساب فروشنده و ذخیره ابری</h3>
@@ -48,7 +48,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:right;
 </div>
 <section id="overview" class="panel active">
 <h2>خلاصه فروشگاه</h2><p class="muted" id="welcome">به پنل فروشنده خوش آمدی.</p>
-<div class="cards"><div class="stat"><b id="productCount">0</b><small>کالاهای ثبت‌شده</small></div><div class="stat"><b>2</b><small>سفارش نمونه</small></div><div class="stat"><b>0</b><small>سفارش آماده ارسال</small></div></div>
+<div class="cards"><div class="stat"><b id="productCount">0</b><small>کالاهای ثبت‌شده</small></div><div class="stat"><b>—</b><small>سفارش‌ها (در حال توسعه)</small></div><div class="stat"><b>—</b><small>ارسال و تحویل (در حال توسعه)</small></div></div>
 <div class="notice">برای شروع، اطلاعات فروشگاه را ثبت کن؛ سپس کالاها را اضافه کن. نمایش عمومی فروشگاه پس از بررسی مدارک و تأیید مدیریت فعال می‌شود.</div>
 </section>
 <section id="profile" class="panel">
@@ -96,7 +96,7 @@ function readProductPhoto(file){if(!file)return;if(!file.type.startsWith('image/
 $('productPhoto').addEventListener('change',e=>readProductPhoto(e.target.files[0]));$('productGallery').addEventListener('change',e=>readProductPhoto(e.target.files[0]));
 function toast(s){$('toast').textContent=s;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',2200)}
 function saveProfile(){const n=$('shopName').value.trim();if(!n){toast('نام فروشگاه را وارد کن');return}$('welcome').textContent='پیش‌نویس فروشگاه «'+n+'» ثبت شد. برای انتشار باید بررسی و تأیید شود.';toast('پیش‌نویس اطلاعات فروشگاه ذخیره شد')}
-function addProduct(){const n=$('productName').value.trim(),p=$('productPrice').value.trim(),s=$('productStock').value.trim();if(!n||!p||!s){toast('نام، قیمت و موجودی را کامل کن');return}if(!/^\\d+(\\.\\d+)?$/.test(p)||!/^\\d+$/.test(s)){toast('قیمت و موجودی باید عددی باشند');return}const shopId=$('productShop').value;const names=['پوشاک تبریز','سوغات و شیرینی','صنایع دستی','موبایل و دیجیتال','کیف و کفش'];products.push({id:Date.now().toString(),n,p,s,c:$('productCategory').value,shopId,shopName:names[Number(shopId)],description:$('productDescription').value.trim(),photo:selectedPhoto,createdAt:Date.now()});try{localStorage.setItem(PRODUCT_KEY,JSON.stringify(products))}catch(e){products.pop();toast('فضای ذخیره عکس‌ها پر شده است؛ عکس کوچک‌تری انتخاب کن');return}renderProducts();$('productName').value='';$('productPrice').value='';$('productStock').value='';$('productDescription').value='';$('photoPreview').removeAttribute('src');$('photoPreview').style.display='none';$('photoHint').textContent='عکس محصول را با دوربین گوشی بگیر یا از گالری انتخاب کن.';toast('محصول در این مرورگر ثبت شد؛ فروشگاه سه‌بعدی را باز کن')}
+function addProduct(){const n=$('productName').value.trim(),p=$('productPrice').value.trim(),s=$('productStock').value.trim();if(!n||!p||!s){toast('نام، قیمت و موجودی را کامل کن');return}if(!/^\\d+(\\.\\d+)?$/.test(p)||!/^\\d+$/.test(s)){toast('قیمت و موجودی باید عددی باشند');return}const shopId=$('productShop').value;const names=['پوشاک تبریز','سوغات و شیرینی','صنایع دستی','موبایل و دیجیتال','کیف و کفش'];products.push({id:Date.now().toString(),n,p,s,c:$('productCategory').value,shopId,shopName:names[Number(shopId)],description:$('productDescription').value.trim(),photo:selectedPhoto,createdAt:Date.now()});try{localStorage.setItem(PRODUCT_KEY,JSON.stringify(products))}catch(e){products.pop();toast('فضای ذخیره عکس‌ها پر شده است؛ عکس کوچک‌تری انتخاب کن');return}renderProducts();$('productName').value='';$('productPrice').value='';$('productStock').value='';$('productDescription').value='';$('photoPreview').removeAttribute('src');$('photoPreview').style.display='none';$('photoHint').textContent='عکس محصول را با دوربین گوشی بگیر یا از گالری انتخاب کن.';toast('محصول محلی ذخیره شد؛ برای ثبت ابری وارد حساب فروشنده شو')}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 loadProducts();
 function changeOrder(id){const e=$(id);e.textContent=e.textContent==='جدید'?'در حال آماده‌سازی':e.textContent==='در حال آماده‌سازی'?'آماده ارسال':'آماده ارسال';toast('وضعیت سفارش در نمونه تغییر کرد')}
