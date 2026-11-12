@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1720">
+<title>حساب کاربری | TABRIZ WORLD</title>
+<style>
+:root{--bg:#0b1720;--panel:#142832;--line:#35505b;--gold:#e8bd70;--muted:#b8c9ce}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0,#37534d 0,transparent 45%),var(--bg);color:#fff;font-family:Tahoma,Arial,sans-serif;min-height:100vh}
+header{padding:22px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+a{color:var(--gold);text-decoration:none}.brand{font-weight:900;letter-spacing:1px}.brand span{color:var(--gold)}
+main{max-width:650px;margin:22px auto;padding:0 14px 50px}.card{background:#122832;border:1px solid #526b70;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 12px 35px #0003}
+h1{font-size:22px;margin:0 0 8px}h2{font-size:16px;color:#f0cf91;margin:0 0 12px}.muted{color:var(--muted);font-size:12px;line-height:1.9}
+label{display:block;font-size:12px;margin:12px 0 6px;color:#e6d8bb}input{width:100%;padding:13px;border:1px solid #45616a;border-radius:10px;background:#091d25;color:white;font:inherit;font-size:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.btn{border:0;border-radius:11px;padding:13px 15px;background:var(--gold);color:#1a2529;font-weight:900;font:inherit;cursor:pointer}.btn.secondary{background:#304951;color:white;border:1px solid #60777d}.btn:disabled{opacity:.55;cursor:not-allowed}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.actions .btn{flex:1}
+.notice{padding:11px;border:1px dashed #806e4b;border-radius:11px;color:#e6d8bb;font-size:11px;line-height:1.9;margin-top:12px}
+#profileCard,#otpStep,#signedIn{display:none}#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#071820;border:1px solid #71878b;border-radius:12px;padding:12px 16px;display:none;font-size:12px;max-width:90%;text-align:center}
+@media(max-width:430px){.grid{grid-template-columns:1fr}header{align-items:flex-start}}
+</style>
+</head>
+<body>
+<header><div class="brand">TABRIZ <span>WORLD</span><div class="muted">حساب کاربری و نشانی تحویل</div></div><a href="index.html">بازگشت به شهر ←</a></header>
+<main>
+<section class="card">
+<h1>حساب کاربری من</h1>
+<p class="muted">بدون ایمیل و بدون رمز عبور؛ ورود با شماره موبایل و کد یک‌بارمصرف انجام می‌شود. اطلاعات نشانی فقط برای حساب خودت ذخیره می‌شود.</p>
+<div id="phoneStep">
+<label for="phone">شماره موبایل</label>
+<input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="مثلاً 09123456789">
+<div class="actions"><button class="btn" id="sendOtp">ارسال کد تأیید</button></div>
+<p class="muted" id="phoneHint">شماره را با 09 یا کد کشور وارد کن.</p>
+</div>
+<div id="otpStep">
+<label for="otp">کد تأیید پیامکی</label>
+<input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="کد ۶ رقمی">
+<div class="actions"><button class="btn" id="verifyOtp">تأیید و ورود</button><button class="btn secondary" id="backPhone">تغییر شماره</button></div>
+</div>
+<div id="signedIn">
+<p class="muted" id="accountStatus"></p>
+<div class="actions"><button class="btn secondary" id="signOut">خروج از حساب</button></div>
+</div>
+<div class="notice">برای آزمایش کد ثابت باید شماره موبایل مشخص به‌عنوان Test Phone Number در تنظیمات Supabase ثبت شود. کد آزمایشی عمومی در سایت قرار نمی‌دهیم تا حساب دیگران قابل تصاحب نباشد.</div>
+</section>
+<section class="card" id="profileCard">
+<h2>مشخصات و آدرس خانه</h2>
+<p class="muted">این نشانی برای ارسال سفارش‌های واقعی استفاده خواهد شد. فعلاً یک نشانی اصلی برای هر حساب ذخیره می‌شود.</p>
+<label for="fullName">نام و نام خانوادگی</label><input id="fullName" autocomplete="name" placeholder="نام کامل">
+<div class="grid">
+<div><label for="province">استان</label><input id="province" value="آذربایجان شرقی"></div>
+<div><label for="city">شهر</label><input id="city" value="تبریز"></div>
+<div><label for="neighborhood">محله</label><input id="neighborhood" placeholder="مثلاً ولیعصر"></div>
+<div><label for="postalCode">کد پستی</label><input id="postalCode" inputmode="numeric" autocomplete="postal-code" placeholder="۱۰ رقم"></div>
+</div>
+<label for="streetAddress">خیابان، کوچه و نشانی کامل</label><input id="streetAddress" autocomplete="street-address" placeholder="نام خیابان، کوچه و توضیحات نشانی">
+<div class="grid">
+<div><label for="buildingNumber">پلاک</label><input id="buildingNumber" placeholder="شماره پلاک"></div>
+<div><label for="unitNumber">واحد</label><input id="unitNumber" placeholder="شماره واحد"></div>
+</div>
+<div class="actions"><button class="btn secondary" id="getLocation">ثبت موقعیت فعلی خانه</button><button class="btn" id="saveProfile">ذخیره نشانی</button></div>
+<p class="muted" id="locationStatus">موقعیت جغرافیایی اختیاری است؛ برای ثبت آن اجازه مکان‌یابی مرورگر لازم است.</p>
+</section>
+<div class="muted" style="text-align:center">TABRIZ WORLD · خرید از فروشگاه‌های تبریز</div>
+</main>
+<div id="toast"></div>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
+const supabase=createClient('https://msiiyofbjymwjwgfjbpw.supabase.co','sb_publishable_d8eYB6N-49hGZIPVma8HuQ_EwAX1tSW');
+const $=id=>document.getElementById(id);
+let phoneNumber='',latitude=null,longitude=null;
+function toast(message){$('toast').textContent=message;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',3000)}
+function normalizePhone(value){
+ let v=value.replace(/[\\s()-]/g,'');
+ if(/^09\\d{9}$/.test(v))return '+98'+v.slice(1);
+ if(/^9\\d{9}$/.test(v))return '+98'+v;
+ if(/^98\\d{10}$/.test(v))return '+'+v;
+ if(/^\\+\\d{10,15}$/.test(v))return v;
+ return '';
+}
+async function showSession(){
+ const {data:{session}}=await supabase.auth.getSession();
+ if(!session){$('phoneStep').style.display='block';$('otpStep').style.display='none';$('signedIn').style.display='none';$('profileCard').style.display='none';return}
+ $('phoneStep').style.display='none';$('otpStep').style.display='none';$('signedIn').style.display='block';$('profileCard').style.display='block';
+ $('accountStatus').textContent='وارد شدی با شماره '+(session.user.phone||'تأییدشده');
+ await loadProfile(session.user.id);
+}
+async function loadProfile(userId){
+ const {data,error}=await supabase.from('tw_customer_profiles').select('*').eq('user_id',userId).maybeSingle();
+ if(error){toast('دریافت پروفایل ناموفق بود: '+error.message);return}
+ if(!data)return;
+ for(const id of ['fullName','province','city','neighborhood','postalCode','streetAddress','buildingNumber','unitNumber']){
+  const map={fullName:'full_name',province:'province',city:'city',neighborhood:'neighborhood',postalCode:'postal_code',streetAddress:'street_address',buildingNumber:'building_number',unitNumber:'unit_number'};
+  $(id).value=data[map[id]]||'';
+ }
+ latitude=data.latitude??null;longitude=data.longitude??null;
+ $('locationStatus').textContent=latitude!==null&&longitude!==null?'موقعیت خانه ذخیره شده است.':'موقعیت خانه ثبت نشده است.';
+}
+$('sendOtp').addEventListener('click',async()=>{
+ phoneNumber=normalizePhone($('phone').value);
+ if(!phoneNumber){toast('شماره موبایل معتبر وارد کن؛ نمونه: 09123456789');return}
+ $('sendOtp').disabled=true;
+ const {error}=await supabase.auth.signInWithOtp({phone:phoneNumber});
+ $('sendOtp').disabled=false;
+ if(error){toast('ارسال کد انجام نشد: '+error.message);return}
+ $('phoneStep').style.display='none';$('otpStep').style.display='block';$('phoneHint').textContent='کد به شماره '+phoneNumber+' ارسال شد.';
+ toast('درخواست کد تأیید ثبت شد.');
+});
+$('verifyOtp').addEventListener('click',async()=>{
+ const token=$('otp').value.trim();
+ if(!/^\\d{6}$/.test(token)){toast('کد تأیید باید ۶ رقم باشد.');return}
+ $('verifyOtp').disabled=true;
+ const {error}=await supabase.auth.verifyOtp({phone:phoneNumber,token,type:'sms'});
+ $('verifyOtp').disabled=false;
+ if(error){toast('کد تأیید نشد: '+error.message);return}
+ await showSession();toast('با موفقیت وارد شدی.');
+});
+$('backPhone').addEventListener('click',()=>{$('otpStep').style.display='none';$('phoneStep').style.display='block'});
+$('signOut').addEventListener('click',async()=>{await supabase.auth.signOut();latitude=null;longitude=null;await showSession();toast('از حساب خارج شدی.')});
+$('getLocation').addEventListener('click',()=>{
+ if(!navigator.geolocation){toast('مکان‌یابی در این مرورگر پشتیبانی نمی‌شود.');return}
+ $('getLocation').disabled=true;
+ navigator.geolocation.getCurrentPosition(pos=>{
+  latitude=pos.coords.latitude;longitude=pos.coords.longitude;$('locationStatus').textContent='موقعیت خانه دریافت شد و پس از ذخیره پروفایل ثبت می‌شود.';$('getLocation').disabled=false;
+ },err=>{$('getLocation').disabled=false;toast('مکان‌یابی انجام نشد؛ مجوز مکان را بررسی کن.')},{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+});
+$('saveProfile').addEventListener('click',async()=>{
+ const {data:{user}}=await supabase.auth.getUser();
+ if(!user){toast('ابتدا وارد حساب شو.');return}
+ const fullName=$('fullName').value.trim(),streetAddress=$('streetAddress').value.trim(),postalCode=$('postalCode').value.trim();
+ if(!fullName||!streetAddress){toast('نام کامل و نشانی خیابان را وارد کن.');return}
+ if(postalCode&&!/^\\d{10}$/.test(postalCode)){toast('کد پستی باید ۱۰ رقم باشد.');return}
+ const row={user_id:user.id,full_name:fullName,province:$('province').value.trim(),city:$('city').value.trim(),neighborhood:$('neighborhood').value.trim(),postal_code:postalCode,street_address:streetAddress,building_number:$('buildingNumber').value.trim(),unit_number:$('unitNumber').value.trim(),latitude,longitude,updated_at:new Date().toISOString()};
+ $('saveProfile').disabled=true;
+ const {error}=await supabase.from('tw_customer_profiles').upsert(row,{onConflict:'user_id'});
+ $('saveProfile').disabled=false;
+ if(error){toast('ذخیره نشانی ناموفق بود: '+error.message);return}
+ toast('نشانی خانه با امنیت در حساب تو ذخیره شد.');
+});
+showSession();
+</script>
+</body>
+</html>
