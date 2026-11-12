@@ -37,6 +37,7 @@ nav button{background:none;border:0;color:#d8e2e2;font-size:11px}
 .product-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .product{background:#1b3740;border:1px solid #45616a;border-radius:12px;padding:11px;font-size:12px}
 .product b{display:block;margin-top:7px;color:#f0cf91}.shop-actions{display:flex;gap:8px;margin-top:13px}.shop-actions button{flex:1;border:0;border-radius:10px;padding:11px;background:#d8ad62;color:#1a2529;font-weight:bold}.shop-actions button:last-child{background:#304951;color:#fff}
+.gateway-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}.gateway-option{background:#1b3740;color:#fff;border:1px solid #45616a;border-radius:11px;padding:11px 8px;text-align:right;font-size:11px;line-height:1.8}.gateway-option.selected{border:2px solid #e8bd70;background:#3a3022;box-shadow:0 0 0 2px #e8bd7022}.gateway-option b{display:block;color:#f0cf91;font-size:12px}.gateway-note{font-size:10px;color:#bdc9cd;line-height:1.9;margin:8px 0}@media(max-width:360px){.gateway-list{grid-template-columns:1fr}}
 
 #toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#0b1b23ed;border:1px solid #71878b;border-radius:14px;padding:14px 18px;font-size:12px;display:none;text-align:center;max-width:80%}
 @media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}.places{grid-template-columns:repeat(4,1fr)}.hero{min-height:440px}.joystick{right:40px;bottom:35px}}
@@ -81,9 +82,17 @@ nav button{background:none;border:0;color:#d8e2e2;font-size:11px}
    <input id="buyerPhone" inputmode="tel" placeholder="شماره تماس" style="padding:12px;border-radius:9px;border:1px solid #45616a;background:#0b1d25;color:white">
    <textarea id="buyerAddress" placeholder="نشانی کامل برای ارسال کالا" rows="3" style="padding:12px;border-radius:9px;border:1px solid #45616a;background:#0b1d25;color:white;resize:vertical"></textarea>
   </div>
-  <p style="margin-top:12px;color:#f0cf91">روش پرداخت: پرداخت آنلاین از طریق درگاه بانکی</p>
-  <div style="border:1px solid #8b744c;border-radius:11px;padding:11px;font-size:11px;line-height:1.9;color:#e6d8bb">درگاه پرداخت واقعی هنوز به سرور و حساب پذیرندگی فروشنده متصل نشده است. پس از راه‌اندازی درگاه، پرداخت امن و تأیید سفارش از این بخش انجام می‌شود.</div>
-  <div class="shop-actions"><button disabled style="opacity:.55;cursor:not-allowed">پرداخت آنلاین (به‌زودی فعال می‌شود)</button><button onclick="closeCart()" style="background:#304951;color:white">بازگشت</button></div>
+  <p style="margin-top:12px;color:#f0cf91">انتخاب درگاه پرداخت ایرانی</p>
+  <div class="gateway-list" id="gatewayList">
+   <button type="button" class="gateway-option" data-gateway="behpardakht" onclick="selectGateway('behpardakht')"><b>بانک ملت</b>به‌پرداخت ملت</button>
+   <button type="button" class="gateway-option" data-gateway="sadad" onclick="selectGateway('sadad')"><b>بانک ملی</b>سداد</button>
+   <button type="button" class="gateway-option" data-gateway="sep" onclick="selectGateway('sep')"><b>بانک سامان</b>پرداخت الکترونیک سامان (سپ)</button>
+   <button type="button" class="gateway-option" data-gateway="sepehr" onclick="selectGateway('sepehr')"><b>بانک صادرات</b>پرداخت الکترونیک سپهر</button>
+   <button type="button" class="gateway-option" data-gateway="pasargad" onclick="selectGateway('pasargad')"><b>بانک پاسارگاد</b>پرداخت الکترونیک پاسارگاد</button>
+  </div>
+  <p class="gateway-note" id="gatewayStatus">هنوز درگاهی انتخاب نشده است. کارت‌های عضو شتاب معمولاً از طریق درگاه پذیرنده قابل پرداخت‌اند؛ نام بانک این فهرست، شرکت ارائه‌دهنده درگاه است.</p>
+  <div style="border:1px solid #8b744c;border-radius:11px;padding:11px;font-size:11px;line-height:1.9;color:#e6d8bb">این فهرست فعلاً انتخاب‌گر نمایشی است و هیچ پرداخت واقعی انجام نمی‌دهد. فعال‌سازی هر گزینه نیازمند قرارداد و کد پذیرندگی همان شرکت، اتصال امن سمت سرور، بازگشت از درگاه و استعلام نتیجه تراکنش است. اطلاعات کارت و رمز پویا باید فقط در صفحه امن شرکت پرداخت وارد شوند.</div>
+  <div class="shop-actions"><button disabled id="payButton" style="opacity:.55;cursor:not-allowed">پرداخت واقعی هنوز فعال نیست</button><button onclick="closeCart()" style="background:#304951;color:white">بازگشت</button></div>
  </div>
 </div>
 <div id="shopModal" class="shop-modal">
@@ -303,6 +312,20 @@ window.goShop=(index)=>{
  document.getElementById('shopDescription').textContent=s.desc+'؛ برای خرید واقعی باید فروشنده ثبت‌نام کرده و کالا و قیمت را وارد کند.';
  document.getElementById('productList').innerHTML=s.items.map((item,i)=>'<div class="product">'+item[0]+'<b>'+item[1]+'</b><button onclick="addToCart('+index+','+i+')" style="margin-top:8px;width:100%;padding:7px;border:0;border-radius:8px;background:#d8ad62;color:#1a2529;font-weight:bold">افزودن به سبد</button></div>').join('');
  document.getElementById('shopModal').style.display='flex';
+};
+const paymentGateways={
+ behpardakht:{name:'به‌پرداخت ملت',bank:'بانک ملت'},
+ sadad:{name:'سداد',bank:'بانک ملی'},
+ sep:{name:'پرداخت الکترونیک سامان (سپ)',bank:'بانک سامان'},
+ sepehr:{name:'پرداخت الکترونیک سپهر',bank:'بانک صادرات'},
+ pasargad:{name:'پرداخت الکترونیک پاسارگاد',bank:'بانک پاسارگاد'}
+};
+let selectedGateway='';
+window.selectGateway=(key)=>{
+ const gateway=paymentGateways[key];if(!gateway)return;
+ selectedGateway=key;
+ document.querySelectorAll('.gateway-option').forEach(el=>el.classList.toggle('selected',el.dataset.gateway===key));
+ document.getElementById('gatewayStatus').textContent='درگاه انتخاب‌شده: '+gateway.bank+' — '+gateway.name+'؛ این انتخاب هنوز به سامانه بانکی متصل نیست.';
 };
 const cart=[];
 window.addToCart=(shopIndex,itemIndex)=>{
