@@ -25,9 +25,10 @@ button.secondary{background:#344552;color:white}button.good{background:var(--gre
 <main>
 <section class="panel" id="loginPanel">
 <h2>ورود مدیر</h2><p class="muted">فقط حساب‌هایی که دسترسی مدیریت برایشان فعال شده است می‌توانند وارد این بخش شوند.</p>
-<label for="email">ایمیل مدیر</label><input id="email" type="email" autocomplete="username" placeholder="ایمیل حساب مدیر">
-<label for="password">رمز عبور</label><input id="password" type="password" autocomplete="current-password" placeholder="رمز عبور">
-<div class="actions"><button id="loginBtn">ورود امن</button></div><p id="loginMessage" class="muted" role="status"></p>
+<label for="adminPhone">شماره موبایل مدیر</label><input id="adminPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09123456789">
+<div class="actions"><button id="sendAdminOtp">ارسال کد تأیید</button></div>
+<div id="adminOtpWrap" style="display:none"><label for="adminOtp">کد پیامکی ۶ رقمی</label><input id="adminOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="کد ۶ رقمی"><div class="actions"><button id="verifyAdminOtp">تأیید و ورود</button></div></div>
+<p id="loginMessage" class="muted" role="status"></p>
 </section>
 <section id="dashboard">
 <div class="panel">
@@ -47,12 +48,21 @@ const $=id=>document.getElementById(id);
 const shops=['پوشاک تبریز','سوغات و شیرینی','صنایع دستی','موبایل و دیجیتال','کیف و کفش'];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let admin=null;
+let pendingAdminPhone='';
+function normalizeAdminPhone(value){
+ let v=String(value||'').replace(/[\\s()-]/g,'');
+ if(/^09\\d{9}$/.test(v))return '+98'+v.slice(1);
+ if(/^9\\d{9}$/.test(v))return '+98'+v;
+ if(/^98\\d{10}$/.test(v))return '+'+v;
+ if(/^\\+\\d{10,15}$/.test(v))return v;
+ return '';
+}
 function message(s){$('loginMessage').textContent=s}
 async function checkAdmin(user){
  if(!user){admin=null;$('dashboard').style.display='none';$('loginPanel').style.display='block';return false}
  const {data,error}=await db.from('tw_admins').select('user_id').eq('user_id',user.id).maybeSingle();
  if(error||!data){admin=null;$('dashboard').style.display='none';$('loginPanel').style.display='block';message('این حساب هنوز دسترسی مدیریت ندارد. مدیر اصلی باید دسترسی آن را در Supabase فعال کند.');return false}
- admin=user;$('adminIdentity').textContent='مدیر: '+(user.email||user.id);$('loginPanel').style.display='none';$('dashboard').style.display='block';await loadProducts();return true
+ admin=user;$('adminIdentity').textContent='مدیر: '+(user.phone||user.id);$('loginPanel').style.display='none';$('dashboard').style.display='block';await loadProducts();return true
 }
 async function loadProducts(){
  if(!admin)return;
@@ -77,14 +87,23 @@ async function moderate(id,status){
  if(error){alert('تغییر وضعیت انجام نشد: '+error.message);return}
  await loadProducts();
 }
-$('loginBtn').addEventListener('click',async()=>{
- const email=$('email').value.trim(),password=$('password').value;
- if(!email||!password){message('ایمیل و رمز عبور را وارد کن.');return}
- $('loginBtn').disabled=true;message('در حال ورود…');
- const {data,error}=await db.auth.signInWithPassword({email,password});
- $('loginBtn').disabled=false;
- if(error){message('ورود ناموفق: '+error.message);return}
- await checkAdmin(data.user);
+$('sendAdminOtp').addEventListener('click',async()=>{
+ pendingAdminPhone=normalizeAdminPhone($('adminPhone').value);
+ if(!pendingAdminPhone){message('شماره موبایل معتبر وارد کن.');return}
+ $('sendAdminOtp').disabled=true;message('در حال ارسال کد…');
+ const {error}=await db.auth.signInWithOtp({phone:pendingAdminPhone});
+ $('sendAdminOtp').disabled=false;
+ if(error){message('ارسال کد ناموفق: '+error.message);return}
+ $('adminOtpWrap').style.display='block';message('کد تأیید برای '+pendingAdminPhone+' درخواست شد.');
+});
+$('verifyAdminOtp').addEventListener('click',async()=>{
+ const token=$('adminOtp').value.trim();
+ if(!/^\\d{6}$/.test(token)){message('کد تأیید باید ۶ رقم باشد.');return}
+ $('verifyAdminOtp').disabled=true;message('در حال بررسی کد…');
+ const {data,error}=await db.auth.verifyOtp({phone:pendingAdminPhone,token,type:'sms'});
+ $('verifyAdminOtp').disabled=false;
+ if(error){message('تأیید ناموفق: '+error.message);return}
+ pendingAdminPhone='';await checkAdmin(data.user);
 });
 $('logoutBtn').addEventListener('click',async()=>{await db.auth.signOut();admin=null;$('dashboard').style.display='none';$('loginPanel').style.display='block';message('از حساب خارج شدی.')});
 $('refreshBtn').addEventListener('click',loadProducts);
