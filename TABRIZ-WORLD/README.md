@@ -37,7 +37,7 @@ This repository folder is the project foundation and mobile UI prototype. It is 
 - See [`docs/SELLER-DIRECT-PAYMENTS.md`](docs/SELLER-DIRECT-PAYMENTS.md) for the payment flow, security controls, and provider constraints.
 
 ## Seller dashboard and cloud product catalogue
-- Open [`prototype/seller-dashboard.html`](prototype/seller-dashboard.html) for seller sign-up/sign-in and product submission with a camera or gallery photo.
+- Open [`prototype/seller-dashboard.html`](prototype/seller-dashboard.html) for seller phone-OTP sign-in and product submission with a camera or gallery photo.
 - Product records and images are stored in the connected Supabase project. New products start as pending and are not shown in public storefronts until approved.
 - Open [`prototype/admin-dashboard.html`](prototype/admin-dashboard.html) to review, approve, or reject submitted products.
 - Follow [`docs/ADMIN-SETUP.md`](docs/ADMIN-SETUP.md) to grant the first administrator access securely.
