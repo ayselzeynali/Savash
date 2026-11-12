@@ -31,16 +31,16 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:right;
 
 <section class="item" id="cloudAuth" style="margin:16px 0">
   <h3 style="margin-top:0">حساب فروشنده و ذخیره ابری</h3>
-  <p class="muted" id="cloudAuthStatus">برای ثبت محصول در سرور، وارد حساب فروشنده شو یا حساب جدید بساز.</p>
-  <div class="grid">
-    <div><label>ایمیل</label><input id="cloudEmail" type="email" autocomplete="email" placeholder="name@example.com"></div>
-    <div><label>رمز عبور</label><input id="cloudPassword" type="password" autocomplete="current-password" minlength="8" placeholder="حداقل ۸ کاراکتر"></div>
+  <p class="muted" id="cloudAuthStatus">برای ثبت محصول در سرور، با شماره موبایل و کد پیامکی وارد حساب فروشنده شو.</p>
+  <div id="cloudPhoneWrap">
+    <label>شماره موبایل فروشنده</label><input id="cloudPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09123456789">
+    <div class="row" style="margin-top:10px"><button class="btn primary" id="cloudSendOtp">ارسال کد تأیید</button></div>
   </div>
-  <div class="row" style="margin-top:10px">
-    <button class="btn primary" id="cloudSignIn">ورود</button>
-    <button class="btn" id="cloudSignUp">ساخت حساب فروشنده</button>
-    <button class="btn" id="cloudSignOut" style="display:none">خروج</button>
+  <div id="cloudOtpWrap" style="display:none">
+    <label>کد تأیید پیامکی (۶ رقم)</label><input id="cloudOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="کد ۶ رقمی">
+    <div class="row" style="margin-top:10px"><button class="btn primary" id="cloudVerifyOtp">تأیید و ورود</button></div>
   </div>
+  <div class="row" style="margin-top:10px"><button class="btn" id="cloudSignOut" style="display:none">خروج</button></div>
   <p class="muted">محصولات جدید پس از ثبت، برای بررسی مدیریت ارسال می‌شوند و بعد از تأیید در فروشگاه عمومی نمایش داده خواهند شد.</p>
 </section>
 <div class="tabs">
@@ -111,12 +111,21 @@ let cloudUser=null;
 let cloudProducts=[];
 const shopNames=['پوشاک تبریز','سوغات و شیرینی','صنایع دستی','موبایل و دیجیتال','کیف و کفش'];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let pendingPhone='';
+function normalizeSellerPhone(value){
+ let v=String(value||'').replace(/[\\s()-]/g,'');
+ if(/^09\\d{9}$/.test(v))return '+98'+v.slice(1);
+ if(/^9\\d{9}$/.test(v))return '+98'+v;
+ if(/^98\\d{10}$/.test(v))return '+'+v;
+ if(/^\\+\\d{10,15}$/.test(v))return v;
+ return '';
+}
 function setAuthUI(){
  const status=document.getElementById('cloudAuthStatus');
- status.textContent=cloudUser?'وارد شده‌ای: '+(cloudUser.email||'حساب فروشنده')+' — محصولات در فضای ابری ذخیره می‌شوند.':'برای ثبت محصول در سرور، وارد حساب فروشنده شو یا حساب جدید بساز.';
+ status.textContent=cloudUser?'وارد شده‌ای: '+(cloudUser.phone||'شماره تأییدشده')+' — محصولات در فضای ابری ذخیره می‌شوند.':'برای ثبت محصول، شماره موبایل را وارد و کد پیامکی را تأیید کن.';
+ document.getElementById('cloudPhoneWrap').style.display=cloudUser?'none':'block';
+ document.getElementById('cloudOtpWrap').style.display=(!cloudUser&&pendingPhone)?'block':'none';
  document.getElementById('cloudSignOut').style.display=cloudUser?'inline-block':'none';
- document.getElementById('cloudSignIn').style.display=cloudUser?'none':'inline-block';
- document.getElementById('cloudSignUp').style.display=cloudUser?'none':'inline-block';
 }
 async function cloudLoadProducts(){
  if(!cloudUser){cloudProducts=[];renderCloudProducts();return}
@@ -167,23 +176,26 @@ window.addProduct=async()=>{
   toast('ثبت محصول ناموفق بود: '+(e.message||'خطای نامشخص'));
  }
 };
-document.getElementById('cloudSignIn').addEventListener('click',async()=>{
- const email=$('cloudEmail').value.trim(),password=$('cloudPassword').value;
- if(!email||!password)return toast('ایمیل و رمز عبور را وارد کن');
- const {data,error}=await cloud.auth.signInWithPassword({email,password});
- if(error)return toast('ورود ناموفق: '+error.message);
- cloudUser=data.user;setAuthUI();await cloudLoadProducts();toast('ورود موفق بود');
+document.getElementById('cloudSendOtp').addEventListener('click',async()=>{
+ pendingPhone=normalizeSellerPhone($('cloudPhone').value);
+ if(!pendingPhone)return toast('شماره موبایل معتبر وارد کن؛ نمونه: 09123456789');
+ const button=$('cloudSendOtp');button.disabled=true;
+ const {error}=await cloud.auth.signInWithOtp({phone:pendingPhone});
+ button.disabled=false;
+ if(error)return toast('ارسال کد ناموفق بود: '+error.message);
+ setAuthUI();toast('درخواست کد تأیید ثبت شد.');
 });
-document.getElementById('cloudSignUp').addEventListener('click',async()=>{
- const email=$('cloudEmail').value.trim(),password=$('cloudPassword').value;
- if(!email||password.length<8)return toast('ایمیل معتبر و رمز حداقل ۸ کاراکتری وارد کن');
- const {data,error}=await cloud.auth.signUp({email,password});
- if(error)return toast('ساخت حساب ناموفق: '+error.message);
- if(data.session){cloudUser=data.user;setAuthUI();await cloudLoadProducts();toast('حساب ساخته شد و وارد شدی')}
- else toast('لینک تأیید به ایمیلت ارسال شد؛ پس از تأیید، وارد حساب شو.');
+document.getElementById('cloudVerifyOtp').addEventListener('click',async()=>{
+ const token=$('cloudOtp').value.trim();
+ if(!/^\\d{6}$/.test(token))return toast('کد تأیید باید ۶ رقم باشد.');
+ const button=$('cloudVerifyOtp');button.disabled=true;
+ const {data,error}=await cloud.auth.verifyOtp({phone:pendingPhone,token,type:'sms'});
+ button.disabled=false;
+ if(error)return toast('کد تأیید نشد: '+error.message);
+ cloudUser=data.user;pendingPhone='';setAuthUI();await cloudLoadProducts();toast('ورود فروشنده موفق بود.');
 });
 document.getElementById('cloudSignOut').addEventListener('click',async()=>{
- await cloud.auth.signOut();cloudUser=null;cloudProducts=[];setAuthUI();renderCloudProducts();toast('از حساب خارج شدی');
+ await cloud.auth.signOut();cloudUser=null;cloudProducts=[];pendingPhone='';setAuthUI();renderCloudProducts();toast('از حساب خارج شدی');
 });
 const {data:{user}}=await cloud.auth.getUser();cloudUser=user||null;setAuthUI();await cloudLoadProducts();
 // Auth state is loaded on page start and updated by the explicit sign-in/sign-out handlers.
