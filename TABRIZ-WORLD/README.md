@@ -51,6 +51,8 @@ This repository folder is the project foundation and mobile UI prototype. It is 
 ## Buyer-seller text messaging
 - `prototype/text-chat.html` is a mobile-friendly preview of the text-message interface.
 - Live voice calls and microphone access are not part of the product direction.
-- `prototype/text-chat.html` now contains Supabase phone-OTP sign-in, conversation creation, message persistence, and a Postgres Changes subscription for incoming messages.
-- The frontend implementation is present, but end-to-end delivery is not certified until the Supabase tables (`tw_conversations`, `tw_messages`), RLS policies, grants, and Realtime publication are checked in the connected project with two separate customer/seller accounts.
-- Never weaken RLS to make chat appear to work: only the buyer and seller assigned to a conversation may read or send its messages. No fixed shared OTP or service-role key belongs in the browser.
+- `prototype/text-chat.html` includes Supabase phone-OTP sign-in, private one-to-one conversations, persistent messages, incoming-message Realtime updates, unread badges, read receipts, and opt-in browser notifications while the page is open.
+- The `tw_conversation_contacts()` RPC exposes only the other participant's display name for conversations the signed-in user belongs to; it does not expose addresses or phone numbers.
+- Migration `supabase/migrations/20261112190000_tw_chat_read_receipts_and_private_contact_names.sql` adds recipient-only read receipts and the private contact-name RPC. Authenticated clients receive UPDATE permission only for `tw_messages.read_at`, not message body or sender identity.
+- Supabase project configuration currently contains the chat tables, participant-only SELECT/INSERT policies, recipient-only read-receipt UPDATE policy, and both chat tables in `supabase_realtime`.
+- End-to-end delivery is still not certified with two separate real customer/seller accounts. Do not weaken RLS to make chat appear to work; no fixed shared OTP or service-role key belongs in the browser.
