@@ -26,7 +26,7 @@ nav button{background:none;border:0;color:#d8e2e2;font-size:11px}
 .topbar{position:absolute;top:calc(12px + env(safe-area-inset-top));left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .glass{background:#091820c9;border:1px solid #557079;border-radius:13px;padding:9px 12px;backdrop-filter:blur(10px);font-size:11px}
 .iconbtn{background:#091820d9;color:white;border:1px solid #64777a;border-radius:12px;padding:10px 13px}
-.location{position:absolute;top:75px;right:12px;max-width:190px}.bottomleft{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom));left:14px;display:flex;gap:8px;flex-direction:column}
+.location{position:absolute;top:75px;right:12px;max-width:190px}.destination-panel{position:absolute;top:140px;right:12px;display:flex;flex-wrap:wrap;gap:5px;max-width:230px;align-items:center}.destination-panel span{width:100%;color:#e8bd70;font-size:10px}.destination-panel button{border:1px solid #6b7e7d;background:#142a31;color:#fff;border-radius:9px;padding:7px 9px;font-size:10px}.bottomleft{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom));left:14px;display:flex;gap:8px;flex-direction:column}
 .action{background:#d8ad62;color:#1a2529;border:0;border-radius:50%;width:58px;height:58px;font-weight:bold;box-shadow:0 4px 20px #0008}
 .joystick{position:absolute;bottom:calc(28px + env(safe-area-inset-bottom));right:20px;width:116px;height:116px;border-radius:50%;border:1px solid #a4b6b777;background:#07161a88;touch-action:none}
 .stick{position:absolute;width:48px;height:48px;left:34px;top:34px;border-radius:50%;background:#e8bd70cc;border:2px solid #fff8;box-shadow:0 3px 12px #0008}
@@ -60,6 +60,7 @@ nav button{background:none;border:0;color:#d8e2e2;font-size:11px}
 <div class="hud">
 <div class="topbar"><button class="iconbtn" onclick="leaveWorld()">← خروج</button><div class="glass">TABRIZ WORLD <span style="color:#e8bd70">·</span> گشت آزاد</div><button class="iconbtn" onclick="resetPlayer()">⟳</button></div>
 <div class="location glass" id="placeLabel">📍 محله مرکزی تبریز<br><small style="color:#bdc9cd">نسخه آزمایشی محیط</small></div>
+<div class="destination-panel glass"><span>مقصد:</span><button onclick="goTo('square')">میدان ساعت</button><button onclick="goTo('bazaar')">بازار</button><button onclick="goTo('tarbiat')">تربیت</button><button onclick="goTo('elgoli')">ائل‌گلی</button></div>
 <div class="hint">برای حرکت از جوی‌استیک استفاده کن</div>
 <div class="joystick" id="joystick"><div class="stick" id="stick"></div></div>
 <div class="bottomleft"><button class="action" onclick="jump()">↑</button><button class="iconbtn" onclick="toggleView()">🎥 دوربین</button></div>
@@ -89,6 +90,40 @@ function makeTree(x,z){
  const group=new THREE.Group();group.position.set(x,0,z);scene.add(group);
  const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.12,.18,1.2,7),mat('#745238'));trunk.position.y=.6;group.add(trunk);
  const crown=new THREE.Mesh(new THREE.IcosahedronGeometry(.85,1),mat('#456d52'));crown.position.y=1.7;group.add(crown);
+}
+function makeBazaar(x,z){
+ const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);
+ box(g,0,.18,0,18,.36,10,mat('#9b805f'));
+ for(let i=0;i<7;i++){
+  const px=-8+i*2.65;
+  box(g,px,2.1,0,.18,3.8,9,mat('#8e7658'));
+  const arch=new THREE.Mesh(new THREE.TorusGeometry(.72,.12,8,20,Math.PI),mat('#d7bd91'));
+  arch.rotation.z=Math.PI;arch.position.set(px,3.5,4.58);g.add(arch);
+  box(g,px,3.8,0,.22,.18,9.2,mat('#d7bd91'));
+ }
+ for(let side of [-1,1])for(let i=0;i<5;i++){
+  const stall=box(g,-7+i*3.4,1.05,side*4.1,2.4,1.8,.55,mat(i%2?'#a85e3c':'#b68b51'));
+  box(g,-7+i*3.4,2.05,side*4.1,2.6,.16,.8,mat('#d6b36c'));
+ }
+}
+function makeElgoli(x,z){
+ const water=new THREE.Mesh(new THREE.CircleGeometry(11,64),new THREE.MeshStandardMaterial({color:'#3d8790',roughness:.22,metalness:.15}));
+ water.rotation.x=-Math.PI/2;water.position.set(x,.12,z);scene.add(water);
+ const island=new THREE.Mesh(new THREE.CylinderGeometry(3.2,3.8,.6,32),mat('#8b795c'));island.position.set(x,.35,z);scene.add(island);
+ const pavilion=new THREE.Group();pavilion.position.set(x,0,z);scene.add(pavilion);
+ box(pavilion,0,1.8,0,4.8,3.2,4.8,mat('#c6a77c'));
+ for(let a=0;a<4;a++){const ang=a*Math.PI/2;const col=new THREE.Mesh(new THREE.CylinderGeometry(.12,.16,2.8,8),mat('#eee0c1'));col.position.set(Math.cos(ang)*2,1.5,Math.sin(ang)*2);pavilion.add(col)}
+ const roof=new THREE.Mesh(new THREE.ConeGeometry(3.7,1.6,4),mat('#8c5540'));roof.position.y=4.2;roof.rotation.y=Math.PI/4;pavilion.add(roof);
+ for(let i=0;i<24;i++){const a=i*Math.PI/12;makeTree(x+Math.cos(a)*13,z+Math.sin(a)*13)}
+}
+function makeTarbiat(x,z){
+ box(scene,x,.12,z,9,.24,44,mat('#b9a98a'));
+ for(let side of [-1,1])for(let i=0;i<5;i++){
+  const bx=x+side*8,bz=z-18+i*9;
+  const b=makeBuilding(bx,bz,6,7,8+(i%3)*2,['#c8b99d','#b9a080','#d0c3a7'][i%3]);
+  box(b,0,1.1,side===1?-3.55:3.55,1.1,2,.08,mat('#8e5d3e'));
+ }
+ for(let i=0;i<5;i++){makeLamp(x-3,z-17+i*8)}
 }
 function makeLamp(x,z){
  const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);
@@ -143,6 +178,19 @@ function animate(){
 window.enterWorld=()=>{home.classList.remove('active');world.classList.add('active');if(!renderer){buildScene()}active=true;clock.start();animate()};
 window.leaveWorld=()=>{active=false;world.classList.remove('active');home.classList.add('active')};
 window.resetPlayer=()=>{if(player){player.position.set(0,0,20);player.rotation.set(0,0,0)}};
+window.goTo=(place)=>{
+ if(!player)return;
+ const destinations={
+  square:{x:0,z:-18,label:'📍 میدان ساعت · الهام‌گرفته از عمارت شهرداری'},
+  bazaar:{x:35,z:-20,label:'📍 بازار تاریخی تبریز · راسته و تیمچه‌ها'},
+  tarbiat:{x:-35,z:-20,label:'📍 پیاده‌راه تربیت · محدوده خرید و پیاده‌روی'},
+  elgoli:{x:0,z:36,label:'📍 ائل‌گلی · دریاچه و عمارت'}
+ };
+ const d=destinations[place];if(!d)return;
+ player.position.set(d.x,0,d.z);player.rotation.set(0,0,0);
+ document.getElementById('placeLabel').innerHTML=d.label+'<br><small style="color:#bdc9cd">مقصد آزمایشی</small>';
+ notify('به مقصد جدید رسیدی');
+};
 window.toggleView=()=>{thirdPerson=!thirdPerson;notify(thirdPerson?'دوربین سوم‌شخص':'نمای نزدیک')};
 window.jump=()=>{if(player&&!jumping){jumping=true;jumpTime=0}};
 window.notify=(s)=>{const t=document.getElementById('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2100)};
