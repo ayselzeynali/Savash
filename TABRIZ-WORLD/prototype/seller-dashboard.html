@@ -90,7 +90,7 @@ const $=id=>document.getElementById(id);
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab))}));
 const PRODUCT_KEY='tw_seller_products_v1';let products=[];let selectedPhoto='';
 function loadProducts(){try{products=JSON.parse(localStorage.getItem(PRODUCT_KEY)||'[]')}catch(e){products=[]}renderProducts()}
-function renderProducts(){$('productCount').textContent=cloudProducts.length;$('productList').innerHTML=products.map((x,i)=>'<div class="item">'+(x.photo?'<img src="'+x.photo+'" alt="" style="width:100%;height:115px;object-fit:cover;border-radius:8px">':'')+'<b>'+escapeHtml(x.n)+'</b><p class="muted">'+escapeHtml(x.shopName||'')+' · '+escapeHtml(x.c)+'</p><strong>'+Number(x.p).toLocaleString('fa-IR')+' تومان</strong><br><small>موجودی: '+escapeHtml(x.s)+'</small><p><button class="btn" onclick="removeProduct('+i+')">حذف</button></p></div>').join('')}
+function renderProducts(){$('productCount').textContent=products.length;$('productList').innerHTML=products.map((x,i)=>'<div class="item">'+(x.photo?'<img src="'+x.photo+'" alt="" style="width:100%;height:115px;object-fit:cover;border-radius:8px">':'')+'<b>'+escapeHtml(x.n)+'</b><p class="muted">'+escapeHtml(x.shopName||'')+' · '+escapeHtml(x.c)+'</p><strong>'+Number(x.p).toLocaleString('fa-IR')+' تومان</strong><br><small>موجودی: '+escapeHtml(x.s)+'</small><p><button class="btn" onclick="removeProduct('+i+')">حذف</button></p></div>').join('')}
 function removeProduct(i){products.splice(i,1);localStorage.setItem(PRODUCT_KEY,JSON.stringify(products));renderProducts();toast('محصول حذف شد')}
 function readProductPhoto(file){if(!file)return;if(!file.type.startsWith('image/')){toast('فقط فایل عکس انتخاب کن');return}const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const max=1000,scale=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);selectedPhoto=c.toDataURL('image/jpeg',.78);$('photoPreview').src=selectedPhoto;$('photoPreview').style.display='block';$('photoHint').textContent='عکس آماده ثبت است.'};img.src=reader.result};reader.readAsDataURL(file)}
 $('productPhoto').addEventListener('change',e=>readProductPhoto(e.target.files[0]));$('productGallery').addEventListener('change',e=>readProductPhoto(e.target.files[0]));
@@ -135,7 +135,7 @@ async function cloudLoadProducts(){
  renderCloudProducts();
 }
 function renderCloudProducts(){
- $('productCount').textContent=products.length;
+ $('productCount').textContent=cloudProducts.length;
  $('productList').innerHTML=cloudProducts.map((p,i)=>'<div class="item">'+(p.photo?'<img src="'+esc(p.photo)+'" alt="" style="width:100%;height:115px;object-fit:cover;border-radius:8px">':'')+'<b>'+esc(p.n)+'</b><p class="muted">'+esc(p.shopName)+' · '+esc(p.c)+'</p><strong>'+Number(p.p).toLocaleString('fa-IR')+' تومان</strong><br><small>موجودی: '+esc(p.s)+' · وضعیت: '+esc(p.status==='approved'?'تأیید شده':p.status==='rejected'?'رد شده':'در انتظار بررسی')+'</small><p><button class="btn" onclick="removeProduct(\''+p.id+'\')">حذف</button></p></div>').join('');
 }
 window.loadProducts=cloudLoadProducts;
