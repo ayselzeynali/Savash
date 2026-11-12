@@ -72,12 +72,26 @@ nav button{background:none;border:0;color:#d8e2e2;font-size:11px}
 <div class="hint">برای حرکت از جوی‌استیک استفاده کن</div>
 <div class="joystick" id="joystick"><div class="stick" id="stick"></div></div>
 <div class="bottomleft"><button class="action" onclick="jump()">↑</button><button class="iconbtn" onclick="toggleView()">🎥 دوربین</button></div>
+<div id="checkoutModal" class="shop-modal">
+ <div class="shop-card">
+  <h3>🧾 تکمیل خرید</h3>
+  <p id="cartSummary">سبد خرید شما خالی است.</p>
+  <div style="display:grid;gap:9px">
+   <input id="buyerName" placeholder="نام و نام خانوادگی" style="padding:12px;border-radius:9px;border:1px solid #45616a;background:#0b1d25;color:white">
+   <input id="buyerPhone" inputmode="tel" placeholder="شماره تماس" style="padding:12px;border-radius:9px;border:1px solid #45616a;background:#0b1d25;color:white">
+   <textarea id="buyerAddress" placeholder="نشانی کامل برای ارسال کالا" rows="3" style="padding:12px;border-radius:9px;border:1px solid #45616a;background:#0b1d25;color:white;resize:vertical"></textarea>
+  </div>
+  <p style="margin-top:12px;color:#f0cf91">روش پرداخت: پرداخت آنلاین از طریق درگاه بانکی</p>
+  <div style="border:1px solid #8b744c;border-radius:11px;padding:11px;font-size:11px;line-height:1.9;color:#e6d8bb">درگاه پرداخت واقعی هنوز به سرور و حساب پذیرندگی فروشنده متصل نشده است. پس از راه‌اندازی درگاه، پرداخت امن و تأیید سفارش از این بخش انجام می‌شود.</div>
+  <div class="shop-actions"><button disabled style="opacity:.55;cursor:not-allowed">پرداخت آنلاین (به‌زودی فعال می‌شود)</button><button onclick="closeCart()" style="background:#304951;color:white">بازگشت</button></div>
+ </div>
+</div>
 <div id="shopModal" class="shop-modal">
  <div class="shop-card">
   <h3 id="shopTitle">فروشگاه تبریز</h3>
   <p id="shopDescription">نمونه ویترین و محصولات پیشنهادی</p>
   <div id="productList" class="product-list"></div>
-  <div class="shop-actions"><button onclick="demoOrder()">ثبت سفارش آزمایشی</button><button onclick="closeShop()">بستن</button></div>
+  <div class="shop-actions"><button onclick="openCart()">🛒 سبد خرید و پرداخت</button><button onclick="closeShop()">بستن</button></div>
  </div>
 </div>
 <div id="toast"></div>
@@ -287,11 +301,22 @@ window.goShop=(index)=>{
  document.getElementById('placeLabel').innerHTML='🛍️ '+s.name+'<br><small style="color:#bdc9cd">فروشگاه نمایشی · اطلاعات قیمت با فروشنده</small>';
  document.getElementById('shopTitle').textContent='🛍️ '+s.name;
  document.getElementById('shopDescription').textContent=s.desc+'؛ برای خرید واقعی باید فروشنده ثبت‌نام کرده و کالا و قیمت را وارد کند.';
- document.getElementById('productList').innerHTML=s.items.map(item=>'<div class="product">'+item[0]+'<b>'+item[1]+'</b></div>').join('');
+ document.getElementById('productList').innerHTML=s.items.map((item,i)=>'<div class="product">'+item[0]+'<b>'+item[1]+'</b><button onclick="addToCart('+index+','+i+')" style="margin-top:8px;width:100%;padding:7px;border:0;border-radius:8px;background:#d8ad62;color:#1a2529;font-weight:bold">افزودن به سبد</button></div>').join('');
  document.getElementById('shopModal').style.display='flex';
 };
+const cart=[];
+window.addToCart=(shopIndex,itemIndex)=>{
+ const s=shopCatalog[shopIndex],item=s&&s.items[itemIndex];if(!item)return;
+ cart.push({shop:s.name,name:item[0]});
+ notify(item[0]+' به سبد خرید اضافه شد');
+};
+window.openCart=()=>{
+ document.getElementById('shopModal').style.display='none';
+ document.getElementById('cartSummary').innerHTML=cart.length?'<b>اقلام انتخاب‌شده:</b><br>'+cart.map((x,i)=>(i+1)+'. '+x.name+' <small>('+x.shop+')</small>').join('<br>')+'<br><br>قیمت و مبلغ نهایی پس از ثبت قیمت توسط فروشنده نمایش داده می‌شود.':'سبد خرید شما خالی است؛ ابتدا از فروشگاه کالا انتخاب کنید.';
+ document.getElementById('checkoutModal').style.display='flex';
+};
+window.closeCart=()=>{document.getElementById('checkoutModal').style.display='none';document.getElementById('shopModal').style.display='flex'};
 window.closeShop=()=>{document.getElementById('shopModal').style.display='none'};
-window.demoOrder=()=>notify('سفارش آزمایشی است؛ پرداخت و ارسال واقعی هنوز فعال نیست.');
 window.toggleView=()=>{thirdPerson=!thirdPerson;notify(thirdPerson?'دوربین سوم‌شخص':'نمای نزدیک')};
 window.jump=()=>{if(player&&!jumping){jumping=true;jumpTime=0}};
 window.notify=(s)=>{const t=document.getElementById('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2100)};
