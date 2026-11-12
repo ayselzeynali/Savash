@@ -52,14 +52,48 @@ jobs:
         run: npx cap add android
       - name: Sync Capacitor
         run: npx cap sync android
-      - name: Build debug APK
+      - name: Configure release signing
+        env:
+          SAVASH_KEYSTORE_BASE64: ${{ secrets.SAVASH_KEYSTORE_BASE64 }}
+          SAVASH_STORE_PASSWORD: ${{ secrets.SAVASH_STORE_PASSWORD }}
+          SAVASH_KEY_ALIAS: ${{ secrets.SAVASH_KEY_ALIAS }}
+          SAVASH_KEY_PASSWORD: ${{ secrets.SAVASH_KEY_PASSWORD }}
+        run: |
+          test -n "$SAVASH_KEYSTORE_BASE64"
+          test -n "$SAVASH_STORE_PASSWORD"
+          test -n "$SAVASH_KEY_ALIAS"
+          test -n "$SAVASH_KEY_PASSWORD"
+          printf '%s' "$SAVASH_KEYSTORE_BASE64" | base64 --decode > android/app/savash-release.jks
+          cat >> android/app/build.gradle <<'EOF'
+
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file("savash-release.jks")
+                      storePassword System.getenv("SAVASH_STORE_PASSWORD")
+                      keyAlias System.getenv("SAVASH_KEY_ALIAS")
+                      keyPassword System.getenv("SAVASH_KEY_PASSWORD")
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                  }
+              }
+          }
+          EOF
+      - name: Build signed release APK
+        env:
+          SAVASH_STORE_PASSWORD: ${{ secrets.SAVASH_STORE_PASSWORD }}
+          SAVASH_KEY_ALIAS: ${{ secrets.SAVASH_KEY_ALIAS }}
+          SAVASH_KEY_PASSWORD: ${{ secrets.SAVASH_KEY_PASSWORD }}
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
-      - name: Upload APK
+          ./gradlew assembleRelease
+      - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: Savash-Android-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: Savash-Signed-Release-APK
+          path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
