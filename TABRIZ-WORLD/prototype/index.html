@@ -52,6 +52,7 @@ nav button{background:none;border:0;color:#d8e2e2;font-size:11px}
 <section class="grid">
 <button class="tile" onclick="enterWorld()"><strong>🏙️ گشت‌وگذار سه‌بعدی</strong><small>حرکت با کنترل لمسی یا صفحه‌کلید</small></button>
 <button class="tile" onclick="notify('ساخت آواتار از روی عکس در مرحله بعدی توسعه اضافه می‌شود.')"><strong>👤 آواتار من</strong><small>شخصیت اختصاصی شما</small></button>
+<button class="tile" onclick="location.href='account.html'"><strong>🏠 حساب و آدرس من</strong><small>ورود با موبایل و ثبت نشانی خانه</small></button>
 <button class="tile" onclick="enterWorld();setTimeout(()=>goShop(0),350)"><strong>🛍️ بازار تبریز</strong><small>فروشگاه‌ها و کالاهای واقعی</small></button>
 <button class="tile" onclick="location.href='text-chat.html'"><strong>💬 پیام‌ها</strong><small>گفت‌وگوی متنی با مشتریان و فروشندگان</small></button>
 </section>
@@ -61,7 +62,7 @@ nav button{background:none;border:0;color:#d8e2e2;font-size:11px}
 </section>
 <div class="info">فروشگاه‌های داخل شهر فعلاً فروشگاه‌های نمایشی با دسته‌بندی‌های بازار تبریز هستند؛ هنوز به کسب‌وکارها، موجودی کالا، پرداخت یا ارسال واقعی متصل نشده‌اند. توجه: این نسخه یک نمونه اولیه سه‌بعدی قابل‌تعامل در مرورگر است. برای گرافیک واقع‌گرایانه نهایی، نقشه دقیق شهر، مدل‌های باکیفیت و نسخه تولیدی اندروید و iOS، پروژه Unreal Engine و دارایی‌های سه‌بعدی اختصاصی لازم است.</div>
 </main>
-<nav><button onclick="window.scrollTo({top:0,behavior:'smooth'})">⌂ خانه</button><button onclick="enterWorld()">⌖ ورود به شهر</button><button onclick="notify('بازار در مرحله توسعه است.')">▣ بازار</button><button onclick="notify('پروفایل در مرحله توسعه است.')">◎ پروفایل</button></nav>
+<nav><button onclick="window.scrollTo({top:0,behavior:'smooth'})">⌂ خانه</button><button onclick="enterWorld()">⌖ ورود به شهر</button><button onclick="notify('بازار در مرحله توسعه است.')">▣ بازار</button><button onclick="location.href='account.html'">◎ حساب من</button></nav>
 </section>
 <section id="world" class="screen">
 <canvas id="scene"></canvas>
