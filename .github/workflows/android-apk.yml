@@ -11,6 +11,7 @@ on:
       - "manifest.webmanifest"
       - "sw.js"
       - "savash-bg.jpg"
+      - "assets/savash-theme.mp3"
       - ".github/workflows/android-apk.yml"
 
 permissions:
@@ -35,11 +36,14 @@ jobs:
         run: npm install
       - name: Prepare game assets
         run: |
-          mkdir -p www
+          mkdir -p www/assets
           cp index.html www/index.html
           cp manifest.webmanifest www/manifest.webmanifest
           test -s savash-bg.jpg
           cp savash-bg.jpg www/savash-bg.jpg
+          if [ -s assets/savash-theme.mp3 ]; then
+            cp assets/savash-theme.mp3 www/assets/savash-theme.mp3
+          fi
           cp sw.js www/sw.js
       - name: Generate Android project
         run: npx cap add android
