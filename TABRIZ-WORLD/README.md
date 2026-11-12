@@ -51,5 +51,6 @@ This repository folder is the project foundation and mobile UI prototype. It is 
 ## Buyer-seller text messaging
 - `prototype/text-chat.html` is a mobile-friendly preview of the text-message interface.
 - Live voice calls and microphone access are not part of the product direction.
-- The current chat page is a local-only prototype: messages stay in the same browser and are not delivered to another account or device.
-- Production messaging requires authenticated customer/seller accounts, server-side authorization (including order or shop access rules), persistent message storage, and a secure API or realtime delivery service. Do not expose messages across unrelated accounts.
+- `prototype/text-chat.html` now contains Supabase phone-OTP sign-in, conversation creation, message persistence, and a Postgres Changes subscription for incoming messages.
+- The frontend implementation is present, but end-to-end delivery is not certified until the Supabase tables (`tw_conversations`, `tw_messages`), RLS policies, grants, and Realtime publication are checked in the connected project with two separate customer/seller accounts.
+- Never weaken RLS to make chat appear to work: only the buyer and seller assigned to a conversation may read or send its messages. No fixed shared OTP or service-role key belongs in the browser.
