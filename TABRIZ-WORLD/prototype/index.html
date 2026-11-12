@@ -332,6 +332,7 @@ window.selectGateway=(key)=>{
  document.getElementById('gatewayStatus').textContent='درگاه انتخاب‌شده: '+gateway.bank+' — '+gateway.name+'؛ این انتخاب هنوز به سامانه بانکی متصل نیست.';
 };
 const cart=[];
+window.messageSeller=(itemIndex)=>{const p=activeCloudProducts[itemIndex];if(!p?.seller_id){if(window.notify)window.notify('اطلاعات فروشنده در دسترس نیست');return}location.href='text-chat.html?seller='+encodeURIComponent(p.seller_id)+'&product='+encodeURIComponent(p.name||'محصول فروشگاه')};
 window.addToCart=(shopIndex,itemIndex)=>{
  let sellerProducts=[];try{sellerProducts=JSON.parse(localStorage.getItem('tw_seller_products_v1')||'[]').filter(p=>String(p.shopId)===String(shopIndex))}catch(e){}
  if(sellerProducts.length){const p=sellerProducts[itemIndex];if(!p)return;cart.push({shop:shopCatalog[shopIndex].name,name:p.n,price:Number(p.p)});notify(p.n+' به سبد خرید اضافه شد');return}
@@ -366,14 +367,14 @@ let activeCloudProducts=[];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 window.goShop=async(index)=>{
  await oldGoShop(index);
- const {data,error}=await tw.from('tw_products').select('id,shop_id,name,description,price_toman,stock,image_path,category').eq('shop_id',index).eq('status','approved').order('created_at',{ascending:false});
+ const {data,error}=await tw.from('tw_products').select('id,seller_id,shop_id,name,description,price_toman,stock,image_path,category').eq('shop_id',index).eq('status','approved').order('created_at',{ascending:false});
  if(error){if(window.notify)window.notify('دریافت کالاهای فروشنده فعلاً ممکن نشد');return}
  activeCloudProducts=data||[];
  if(!activeCloudProducts.length)return;
  document.getElementById('shopDescription').textContent='کالاهای تأییدشده فروشندگان تبریز؛ برای خرید با فروشنده پیام بده.';
  document.getElementById('productList').innerHTML=activeCloudProducts.map((p,i)=>{
   const photo=p.image_path?tw.storage.from('tw-product-images').getPublicUrl(p.image_path).data.publicUrl:'';
-  return '<div class="product">'+(photo?'<img src="'+esc(photo)+'" alt="" style="width:100%;height:105px;object-fit:cover;border-radius:8px">':'')+'<b>'+esc(p.name)+'</b><span style="display:block;margin-top:5px">'+Number(p.price_toman).toLocaleString('fa-IR')+' تومان</span><small style="display:block;color:#bdc9cd;margin-top:4px">موجودی: '+Number(p.stock).toLocaleString('fa-IR')+'</small><button onclick="addToCart('+index+','+i+')" style="margin-top:8px;width:100%;padding:7px;border:0;border-radius:8px;background:#d8ad62;color:#1a2529;font-weight:bold">افزودن به سبد</button></div>';
+  return '<div class="product">'+(photo?'<img src="'+esc(photo)+'" alt="" style="width:100%;height:105px;object-fit:cover;border-radius:8px">':'')+'<b>'+esc(p.name)+'</b><span style="display:block;margin-top:5px">'+Number(p.price_toman).toLocaleString('fa-IR')+' تومان</span><small style="display:block;color:#bdc9cd;margin-top:4px">موجودی: '+Number(p.stock).toLocaleString('fa-IR')+'</small><button onclick="addToCart('+index+','+i+')" style="margin-top:8px;width:100%;padding:7px;border:0;border-radius:8px;background:#d8ad62;color:#1a2529;font-weight:bold">افزودن به سبد</button><button onclick="messageSeller('+i+')" style="margin-top:6px;width:100%;padding:7px;border:1px solid #d8ad62;border-radius:8px;background:#19333c;color:#f0cf91;font-weight:bold">پیام به فروشنده</button></div>';
  }).join('');
 };
 window.addToCart=(shopIndex,itemIndex)=>{
