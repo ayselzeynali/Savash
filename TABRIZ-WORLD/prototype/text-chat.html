@@ -6,40 +6,117 @@
 <style>
 :root{color-scheme:dark;--bg:#0b1720;--panel:#142832;--line:#35505b;--gold:#e8bd70;--muted:#b8c9ce}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#0b1720,#172d36);color:#fff;font-family:Tahoma,Arial,sans-serif;min-height:100vh}
-header{padding:18px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}header button{background:#1b3740;border:1px solid #587078;color:white;border-radius:10px;padding:9px 12px}header b{color:var(--gold)}
-main{max-width:680px;margin:20px auto;padding:0 14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
-h1{font-size:19px;margin:0}.sub{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.8}
-.notice{margin:14px;padding:11px;border:1px dashed #8b744c;border-radius:10px;color:#e7d7b7;font-size:11px;line-height:2}
+header{padding:18px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}header button,.secondary{background:#1b3740;border:1px solid #587078;color:white;border-radius:10px;padding:9px 12px}header b{color:var(--gold)}
+main{max-width:720px;margin:20px auto;padding:0 14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+h1{font-size:19px;margin:0}.sub{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.8}.pad{padding:16px}
+.notice{margin:14px;padding:11px;border:1px solid #526c62;border-radius:10px;color:#d9eadf;font-size:11px;line-height:2}
+input,button{font-family:inherit}input{min-width:0;background:#0b1d25;color:white;border:1px solid #45616a;border-radius:10px;padding:12px;font-size:13px;width:100%}
+.authrow{display:flex;gap:8px;margin-top:10px}.authrow button,.primary{border:0;border-radius:10px;padding:11px 15px;background:var(--gold);color:#17252a;font-weight:bold;white-space:nowrap}
+.auth{display:none}.status{font-size:12px;color:#f0cf91;margin-top:10px;line-height:1.8}
 .conversations{padding:8px 14px}.conversation{width:100%;display:flex;align-items:center;gap:12px;text-align:right;background:transparent;border:0;border-bottom:1px solid var(--line);padding:14px 2px;color:white;font:inherit;cursor:pointer}
 .avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#3a514c;color:#f0cf91;font-weight:bold;flex:none}.meta{flex:1;min-width:0}.meta b{display:block;font-size:13px}.meta small{display:block;color:var(--muted);font-size:11px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.time{font-size:10px;color:var(--muted)}
-.chat{display:none;border-top:1px solid var(--line)}.chat-head{padding:13px 15px;display:flex;justify-content:space-between;align-items:center}.chat-head button{background:#304951;color:white;border:0;border-radius:8px;padding:8px 10px}
-.messages{height:min(48vh,430px);overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:#0d2028}
-.bubble{max-width:82%;padding:10px 12px;border-radius:13px;font-size:12px;line-height:1.9;background:#25414a;align-self:flex-start;white-space:pre-wrap;overflow-wrap:anywhere}.bubble.mine{background:#6c5635;align-self:flex-end}
-.composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}.composer input{min-width:0;flex:1;background:#0b1d25;color:white;border:1px solid #45616a;border-radius:10px;padding:12px;font:inherit;font-size:12px}.composer button{border:0;border-radius:10px;padding:0 17px;background:var(--gold);color:#17252a;font-weight:bold}
-.empty{padding:22px;text-align:center;color:var(--muted);font-size:12px}
+.chat{display:none;border-top:1px solid var(--line)}.chat-head{padding:13px 15px;display:flex;justify-content:space-between;align-items:center;gap:10px}.chat-head button{background:#304951;color:white;border:0;border-radius:8px;padding:8px 10px}
+.messages{height:min(52vh,480px);overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:#0d2028}
+.bubble{max-width:82%;padding:10px 12px;border-radius:13px;font-size:12px;line-height:1.9;background:#25414a;align-self:flex-start;white-space:pre-wrap;overflow-wrap:anywhere}.bubble.mine{background:#6c5635;align-self:flex-end}.stamp{font-size:9px;color:#c5d2d4;margin-top:3px}
+.composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}.composer input{flex:1}.composer button{border:0;border-radius:10px;padding:0 17px;background:var(--gold);color:#17252a;font-weight:bold}
+.empty{padding:22px;text-align:center;color:var(--muted);font-size:12px}.hidden{display:none!important}
 </style></head>
 <body>
 <header><button onclick="location.href='index.html'">← بازگشت</button><div><b>TABRIZ WORLD</b><div style="font-size:11px;color:#bdc9cd;margin-top:4px">پیام‌های مشتری و فروشنده</div></div></header>
 <main><section class="card">
-<div style="padding:16px 15px 4px"><h1>💬 پیام‌ها</h1><div class="sub">گفت‌وگوی نوشتاری؛ بدون تماس صوتی و دسترسی به میکروفون</div></div>
-<div class="notice">این صفحه فعلاً پیش‌نمایش رابط پیام‌رسان است. پیام‌های آزمایشی فقط در همین مرورگر ذخیره می‌شوند و هنوز به حساب کاربران دیگر ارسال نمی‌شوند. برای چت واقعی بین حساب مشتری و فروشنده، ورود امن کاربران و پایگاه‌داده/سرور پیام‌رسان باید متصل شود.</div>
-<div id="conversationList" class="conversations">
-<button class="conversation" onclick="openChat('seller-demo','فروشگاه نمونه تبریز')"><span class="avatar">ف</span><span class="meta"><b>فروشگاه نمونه تبریز</b><small>برای شروع گفت‌وگو پیام بفرستید</small></span><span class="time">نمونه</span></button>
-<button class="conversation" onclick="openChat('buyer-demo','مشتری نمونه')"><span class="avatar">م</span><span class="meta"><b>مشتری نمونه</b><small>گفت‌وگوی آزمایشی</small></span><span class="time">نمونه</span></button>
+<div class="pad"><h1>💬 پیام‌های من</h1><div class="sub">گفت‌وگوی نوشتاری خصوصی بین مشتری و فروشنده؛ بدون تماس صوتی</div></div>
+<div id="authBox" class="pad">
+ <div class="notice">برای دیدن پیام‌ها با شماره موبایل خود وارد شوید. کد ورود از طریق پیامک Supabase ارسال می‌شود.</div>
+ <div id="phoneStep"><label for="phone">شماره موبایل با پیش‌شماره کشور</label><div class="authrow"><input id="phone" type="tel" autocomplete="tel" placeholder="+98912xxxxxxx"><button id="sendOtp" class="primary">ارسال کد</button></div></div>
+ <div id="otpStep" class="hidden"><label for="otp">کد پیامک‌شده</label><div class="authrow"><input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="کد تأیید"><button id="verifyOtp" class="primary">تأیید و ورود</button></div><button id="backPhone" class="secondary" style="margin-top:8px">تغییر شماره</button></div>
+ <div id="authStatus" class="status" role="status"></div>
 </div>
-<section id="chat" class="chat">
-<div class="chat-head"><div><b id="chatName">گفت‌وگو</b><div class="sub">پیام متنی</div></div><button onclick="closeChat()">فهرست پیام‌ها</button></div>
-<div id="messages" class="messages"><div class="empty">هنوز پیامی ارسال نشده است.</div></div>
-<form class="composer" id="messageForm"><input id="messageInput" maxlength="2000" autocomplete="off" placeholder="پیام خود را بنویسید…" aria-label="متن پیام"><button type="submit">ارسال</button></form>
-</section>
+<div id="appBox" class="hidden">
+ <div class="pad" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span id="accountLabel" class="sub"></span><button id="signOut" class="secondary">خروج</button></div>
+ <div id="notice" class="notice hidden"></div>
+ <div id="conversationList" class="conversations"><div class="empty">در حال دریافت گفت‌وگوها…</div></div>
+ <section id="chat" class="chat">
+  <div class="chat-head"><div><b id="chatName">گفت‌وگو</b><div class="sub">پیام متنی</div></div><button id="backList">فهرست پیام‌ها</button></div>
+  <div id="messages" class="messages"><div class="empty">هنوز پیامی ارسال نشده است.</div></div>
+  <form class="composer" id="messageForm"><input id="messageInput" maxlength="2000" autocomplete="off" placeholder="پیام خود را بنویسید…" aria-label="متن پیام"><button type="submit">ارسال</button></form>
+ </section>
+</div>
 </section></main>
-<script>
-const storeKey='tw_text_chat_demo_v1';let activeChat='';
-const $=id=>document.getElementById(id);
-function readStore(){try{return JSON.parse(localStorage.getItem(storeKey)||'{}')}catch{return {}}}
-function saveStore(data){localStorage.setItem(storeKey,JSON.stringify(data))}
-function openChat(id,name){activeChat=id;$('chatName').textContent=name;$('conversationList').style.display='none';$('chat').style.display='block';renderMessages();$('messageInput').focus()}
-function closeChat(){activeChat='';$('chat').style.display='none';$('conversationList').style.display='block'}
-function renderMessages(){const all=readStore(),items=all[activeChat]||[];const box=$('messages');box.innerHTML='';if(!items.length){box.innerHTML='<div class="empty">هنوز پیامی ارسال نشده است.</div>';return}for(const item of items){const el=document.createElement('div');el.className='bubble'+(item.mine?' mine':'');el.textContent=item.text;box.appendChild(el)}box.scrollTop=box.scrollHeight}
-$('messageForm').addEventListener('submit',e=>{e.preventDefault();const message=$('messageInput').value.trim();if(!message||!activeChat)return;const all=readStore();all[activeChat]=all[activeChat]||[];all[activeChat].push({text:message,mine:true,at:Date.now()});saveStore(all);$('messageInput').value='';renderMessages()});
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
+const supabase=createClient('https://msiiyofbjymwjwgfjbpw.supabase.co','sb_publishable_d8eYB6N-49hGZIPVma8HuQ_EwAX1tSW');
+const $=id=>document.getElementById(id);let currentUser=null,activeConversation=null,realtimeChannel=null,conversations=[];
+const params=new URLSearchParams(location.search),targetSeller=params.get('seller'),productName=params.get('product')||'محصول فروشگاه';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function status(t){$('authStatus').textContent=t||''}
+function showNotice(t){$('notice').textContent=t;$('notice').classList.remove('hidden')}
+function fmt(t){try{return new Date(t).toLocaleString('fa-IR',{dateStyle:'short',timeStyle:'short'})}catch{return ''}}
+async function startSession(){
+ const {data:{session},error}=await supabase.auth.getSession();
+ if(error){status('خطا در بررسی ورود: '+error.message);return}
+ currentUser=session?.user||null;
+ $('authBox').classList.toggle('hidden',!!currentUser);$('appBox').classList.toggle('hidden',!currentUser);
+ if(currentUser){$('accountLabel').textContent='واردشده با '+(currentUser.phone||'حساب کاربری');await loadConversations();if(targetSeller)await openOrCreateConversation(targetSeller)}
+}
+$('sendOtp').addEventListener('click',async()=>{
+ const phone=$('phone').value.trim();if(!/^\+[1-9]\d{7,14}$/.test(phone)){status('شماره را با پیش‌شماره کشور وارد کنید؛ مانند +98912xxxxxxx');return}
+ $('sendOtp').disabled=true;status('در حال ارسال پیامک…');
+ const {error}=await supabase.auth.signInWithOtp({phone});
+ $('sendOtp').disabled=false;if(error){status('ارسال کد انجام نشد: '+error.message);return}
+ $('phoneStep').classList.add('hidden');$('otpStep').classList.remove('hidden');status('کد پیامک‌شده را وارد کنید.')
+});
+$('verifyOtp').addEventListener('click',async()=>{
+ const phone=$('phone').value.trim(),token=$('otp').value.trim();if(!token){status('کد پیامک را وارد کنید.');return}
+ $('verifyOtp').disabled=true;status('در حال تأیید…');
+ const {error}=await supabase.auth.verifyOtp({phone,token,type:'sms'});
+ $('verifyOtp').disabled=false;if(error){status('کد تأیید نشد: '+error.message);return}
+ status('ورود موفق بود.');await startSession()
+});
+$('backPhone').addEventListener('click',()=>{$('otpStep').classList.add('hidden');$('phoneStep').classList.remove('hidden');status('')});
+$('signOut').addEventListener('click',async()=>{if(realtimeChannel)await supabase.removeChannel(realtimeChannel);await supabase.auth.signOut();currentUser=null;activeConversation=null;startSession()});
+supabase.auth.onAuthStateChange((_event,session)=>{if(session?.user&&!currentUser){currentUser=session.user;setTimeout(startSession,0)}});
+async function loadConversations(){
+ const {data,error}=await supabase.from('tw_conversations').select('id,buyer_id,seller_id,created_at,last_message_at').order('last_message_at',{ascending:false});
+ if(error){$('conversationList').innerHTML='<div class="empty">دریافت پیام‌ها ناموفق بود: '+esc(error.message)+'</div>';return}
+ conversations=data||[];renderConversations()
+}
+function renderConversations(){
+ const box=$('conversationList');if(!conversations.length){box.innerHTML='<div class="empty">هنوز گفت‌وگویی ندارید. از صفحه یک محصول، گزینه «پیام به فروشنده» را بزنید.</div>';return}
+ box.innerHTML=conversations.map(c=>{const mine=c.buyer_id===currentUser.id;const label=mine?'گفت‌وگو با فروشنده':'گفت‌وگو با مشتری';return '<button class="conversation" data-id="'+c.id+'"><span class="avatar">'+(mine?'ف':'م')+'</span><span class="meta"><b>'+label+'</b><small>شناسه گفت‌وگو: '+c.id.slice(0,8)+'</small></span><span class="time">'+fmt(c.last_message_at)+'</span></button>'}).join('');
+ box.querySelectorAll('[data-id]').forEach(b=>b.addEventListener('click',()=>openConversation(b.dataset.id)))
+}
+async function openOrCreateConversation(sellerId){
+ if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(sellerId)){showNotice('شناسه فروشنده معتبر نیست.');return}
+ if(sellerId===currentUser.id){showNotice('نمی‌توانید به حساب خودتان پیام بدهید.');return}
+ let c=conversations.find(x=>x.buyer_id===currentUser.id&&x.seller_id===sellerId);
+ if(!c){const {data,error}=await supabase.from('tw_conversations').insert({buyer_id:currentUser.id,seller_id:sellerId}).select('id,buyer_id,seller_id,created_at,last_message_at').single();
+  if(error){showNotice('ساخت گفت‌وگو انجام نشد: '+error.message);return}c=data;conversations.unshift(c);renderConversations()}
+ await openConversation(c.id,productName)
+}
+async function openConversation(id,label){
+ const c=conversations.find(x=>x.id===id);if(!c)return;
+ activeConversation=c;$('conversationList').classList.add('hidden');$('chat').style.display='block';
+ $('chatName').textContent=label|| (c.buyer_id===currentUser.id?'گفت‌وگو با فروشنده':'گفت‌وگو با مشتری');
+ await loadMessages();
+ if(realtimeChannel)await supabase.removeChannel(realtimeChannel);
+ realtimeChannel=supabase.channel('tw-chat-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'tw_messages',filter:'conversation_id=eq.'+id},payload=>{
+  const m=payload.new;if(m.sender_id!==currentUser.id)appendMessage(m); 
+ }).subscribe();
+}
+async function loadMessages(){
+ const {data,error}=await supabase.from('tw_messages').select('id,conversation_id,sender_id,body,created_at').eq('conversation_id',activeConversation.id).order('created_at',{ascending:true}).limit(300);
+ if(error){$('messages').innerHTML='<div class="empty">دریافت پیام‌ها ناموفق بود: '+esc(error.message)+'</div>';return}
+ $('messages').innerHTML='';if(!data?.length){$('messages').innerHTML='<div class="empty">هنوز پیامی ارسال نشده است.</div>';return}
+ data.forEach(appendMessage)
+}
+function appendMessage(m){if(document.querySelector('[data-message-id="'+m.id+'"]'))return;const empty=$('messages').querySelector('.empty');if(empty)empty.remove();const el=document.createElement('div');el.className='bubble'+(m.sender_id===currentUser.id?' mine':'');el.dataset.messageId=m.id;el.textContent=m.body;const stamp=document.createElement('div');stamp.className='stamp';stamp.textContent=fmt(m.created_at);el.appendChild(stamp);$('messages').appendChild(el);$('messages').scrollTop=$('messages').scrollHeight}
+$('messageForm').addEventListener('submit',async e=>{
+ e.preventDefault();const body=$('messageInput').value.trim();if(!body||!activeConversation)return;
+ const button=$('messageForm').querySelector('button');button.disabled=true;
+ const {data,error}=await supabase.from('tw_messages').insert({conversation_id:activeConversation.id,sender_id:currentUser.id,body}).select('id,conversation_id,sender_id,body,created_at').single();
+ button.disabled=false;if(error){showNotice('ارسال پیام انجام نشد: '+error.message);return}
+ $('messageInput').value='';appendMessage(data)
+});
+$('backList').addEventListener('click',async()=>{if(realtimeChannel){await supabase.removeChannel(realtimeChannel);realtimeChannel=null}$('chat').style.display='none';$('conversationList').classList.remove('hidden');await loadConversations()});
+await startSession();
 </script></body></html>
