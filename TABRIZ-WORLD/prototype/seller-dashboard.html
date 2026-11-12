@@ -185,6 +185,6 @@ document.getElementById('cloudSignOut').addEventListener('click',async()=>{
  await cloud.auth.signOut();cloudUser=null;products=[];setAuthUI();renderCloudProducts();toast('از حساب خارج شدی');
 });
 const {data:{user}}=await cloud.auth.getUser();cloudUser=user||null;setAuthUI();await cloudLoadProducts();
-cloud.auth.onAuthStateChange((_event,session)=>{cloudUser=session?.user||null;setAuthUI();cloudLoadProducts()});
+// Auth state is loaded on page start and updated by the explicit sign-in/sign-out handlers.
 </script>
 </body></html>
