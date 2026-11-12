@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: tabriz-world-voice
+    runtime: docker
+    dockerfilePath: ./TABRIZ-WORLD/voice-server/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CALL_JWT_SECRET
+        generateValue: true
+      - key: MAX_CALL_SECONDS
+        value: "3600"
