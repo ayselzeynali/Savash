@@ -1,0 +1,10 @@
+{
+  "name": "tabriz-world-voice-signaling",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Authenticated WebRTC signaling server for TABRIZ WORLD buyer-seller calls",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=20" },
+  "dependencies": { "jsonwebtoken": "9.0.2", "ws": "8.18.3" }
+}
