@@ -179,7 +179,7 @@ function buildScene(){
  const hair=new THREE.Mesh(new THREE.SphereGeometry(.32,16,8,0,Math.PI*2,0,Math.PI/2),mat('#292626'));hair.position.y=2.19;player.add(hair);
  // articulated arms and legs for a visible walking cycle
  const limbMat=mat('#294b60'),skinMat=mat('#c9926d');
- const limbs=[];
+ // shared limb list drives the walk animation
  for(const side of [-1,1]){
   const arm=new THREE.Group();arm.position.set(side*.48,1.55,0);player.add(arm);
   const upper=new THREE.Mesh(new THREE.CapsuleGeometry(.12,.48,4,8),limbMat);upper.position.y=-.3;arm.add(upper);
