@@ -40,11 +40,22 @@ server.on('upgrade', (req, socket, head) => {
     if (url.pathname !== '/signal') throw new Error('bad path');
     const token = url.searchParams.get('token');
     if (!token) throw new Error('missing token');
-    const claims = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'], issuer: 'tabriz-world', audience: 'voice-call' });
+    const claims = jwt.verify(token, JWT_SECRET, {
+      algorithms: ['HS256'], issuer: 'tabriz-world', audience: 'voice-call',
+      maxAge: '5m', clockTolerance: 5
+    });
+    const now = Math.floor(Date.now() / 1000);
     const roomId = String(claims.room_id || '');
     const role = String(claims.role || '');
     const userId = String(claims.sub || '');
-    if (!/^[A-Za-z0-9_-]{6,100}$/.test(roomId) || !userId || !['buyer','seller'].includes(role)) throw new Error('invalid claims');
+    // Require a genuinely short-lived token; never accept a token without exp/iat.
+    if (!Number.isInteger(claims.exp) || !Number.isInteger(claims.iat) ||
+        claims.exp <= now || claims.exp - now > 300 ||
+        now - claims.iat > 300 || claims.iat > now + 5 ||
+        !/^[A-Za-z0-9_-]{6,100}$/.test(roomId) ||
+        !userId || userId.length > 128 || !['buyer','seller'].includes(role)) {
+      throw new Error('invalid claims');
+    }
     wss.handleUpgrade(req, socket, head, ws => {
       ws.roomId = roomId; ws.role = role; ws.userId = userId;
       ws.callTimer = setTimeout(() => ws.close(4008, 'Call time limit reached'), MAX_CALL_SECONDS * 1000);
