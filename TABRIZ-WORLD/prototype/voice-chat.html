@@ -29,7 +29,7 @@ audio{width:100%;margin-top:12px}a{color:var(--gold)}
 </section></main>
 <script>
 /* Configure a secure WebSocket signaling endpoint after deploying the backend. */
-const SIGNALING_URL = "";
+const SIGNALING_URL = ""; // Set to wss://YOUR_HOST/signal after deployment.\nconst TOKEN_ENDPOINT = ""; // Set to the authenticated backend endpoint that returns { token }.
 const $ = id => document.getElementById(id);
 let localStream=null, socket=null, peer=null, joined=false, makingOffer=false;
 const status = message => $('status').innerHTML='<span class="dot"></span>'+message;
