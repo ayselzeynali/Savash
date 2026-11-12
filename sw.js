@@ -1,5 +1,5 @@
-const CACHE_NAME = "savash-shell-v5";
-const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./savash-bg.jpg"];
+const CACHE_NAME = "savash-shell-v6";
+const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./savash-bg.jpg", "./savash-track-5.mp3"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
   self.skipWaiting();
