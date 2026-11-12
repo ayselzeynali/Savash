@@ -39,3 +39,10 @@ This repository folder is the project foundation and mobile UI prototype. It is 
 ## Seller dashboard prototype
 - Open [`prototype/seller-dashboard.html`](prototype/seller-dashboard.html) to preview the seller onboarding form, product catalogue editor, sample order workflow, and secure settlement setup placeholder.
 - This is a front-end demonstration only: it does not persist data, verify sellers, accept bank details, or process orders/payments. Production requires authenticated backend APIs, document verification, database access policies, and provider-approved settlement integration.
+
+## Live buyer-seller voice calling
+- `prototype/voice-chat.html` is the mobile-friendly WebRTC voice-call screen with microphone permission and mute controls.
+- `voice-server/` contains the Node.js WebSocket signaling service and a Docker/Render deployment blueprint. It relays WebRTC signaling only; it does not record or transport call audio.
+- `docs/LIVE-VOICE-CALLING.md` explains the architecture and TURN requirements.
+- `docs/VOICE-CALL-TOKEN-API.md` defines the required authenticated API contract. The main application backend must validate the buyer/seller's order membership and issue a JWT lasting no more than five minutes.
+- The voice call is not production-active yet: deploy the signaling service, configure TURN, implement the authenticated token API, and set `SIGNALING_URL` and `TOKEN_ENDPOINT` in the voice page. Never expose the JWT signing secret in the client.
