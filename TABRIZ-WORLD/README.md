@@ -35,3 +35,7 @@ This repository folder is the project foundation and mobile UI prototype. It is 
 - Marketplace checkout is designed so each participating seller receives their sale through a payment provider's approved split-settlement / multi-beneficiary feature; TABRIZ WORLD receives only its disclosed commission when supported.
 - Bank logos in the prototype are placeholders, not live payment integrations. Direct seller settlement must be confirmed in the provider's current contract and API before enabling a gateway.
 - See [`docs/SELLER-DIRECT-PAYMENTS.md`](docs/SELLER-DIRECT-PAYMENTS.md) for the payment flow, security controls, and provider constraints.
+
+## Seller dashboard prototype
+- Open [`prototype/seller-dashboard.html`](prototype/seller-dashboard.html) to preview the seller onboarding form, product catalogue editor, sample order workflow, and secure settlement setup placeholder.
+- This is a front-end demonstration only: it does not persist data, verify sellers, accept bank details, or process orders/payments. Production requires authenticated backend APIs, document verification, database access policies, and provider-approved settlement integration.
