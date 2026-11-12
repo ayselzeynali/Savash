@@ -14,7 +14,7 @@ input,button{font-family:inherit}input{min-width:0;background:#0b1d25;color:whit
 .authrow{display:flex;gap:8px;margin-top:10px}.authrow button,.primary{border:0;border-radius:10px;padding:11px 15px;background:var(--gold);color:#17252a;font-weight:bold;white-space:nowrap}
 .auth{display:none}.status{font-size:12px;color:#f0cf91;margin-top:10px;line-height:1.8}
 .conversations{padding:8px 14px}.conversation{width:100%;display:flex;align-items:center;gap:12px;text-align:right;background:transparent;border:0;border-bottom:1px solid var(--line);padding:14px 2px;color:white;font:inherit;cursor:pointer}
-.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#3a514c;color:#f0cf91;font-weight:bold;flex:none}.meta{flex:1;min-width:0}.meta b{display:block;font-size:13px}.meta small{display:block;color:var(--muted);font-size:11px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.time{font-size:10px;color:var(--muted)}
+.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#3a514c;color:#f0cf91;font-weight:bold;flex:none}.meta{flex:1;min-width:0}.meta b{display:block;font-size:13px}.meta small{display:block;color:var(--muted);font-size:11px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.time{font-size:10px;color:var(--muted)}.unread{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:20px;background:var(--gold);color:#17252a;font-size:10px;font-weight:bold;margin-inline-start:6px}
 .chat{display:none;border-top:1px solid var(--line)}.chat-head{padding:13px 15px;display:flex;justify-content:space-between;align-items:center;gap:10px}.chat-head button{background:#304951;color:white;border:0;border-radius:8px;padding:8px 10px}
 .messages{height:min(52vh,480px);overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:#0d2028}
 .bubble{max-width:82%;padding:10px 12px;border-radius:13px;font-size:12px;line-height:1.9;background:#25414a;align-self:flex-start;white-space:pre-wrap;overflow-wrap:anywhere}.bubble.mine{background:#6c5635;align-self:flex-end}.stamp{font-size:9px;color:#c5d2d4;margin-top:3px}
@@ -45,7 +45,7 @@ input,button{font-family:inherit}input{min-width:0;background:#0b1d25;color:whit
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 const supabase=createClient('https://msiiyofbjymwjwgfjbpw.supabase.co','sb_publishable_d8eYB6N-49hGZIPVma8HuQ_EwAX1tSW');
-const $=id=>document.getElementById(id);let currentUser=null,activeConversation=null,realtimeChannel=null,conversations=[];
+const $=id=>document.getElementById(id);let currentUser=null,activeConversation=null,realtimeChannel=null,conversations=[],contactNames={},unreadCounts={};
 const params=new URLSearchParams(location.search),targetSeller=params.get('seller'),productName=params.get('product')||'محصول فروشگاه';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function status(t){$('authStatus').textContent=t||''}
@@ -78,11 +78,18 @@ supabase.auth.onAuthStateChange((_event,session)=>{if(session?.user&&!currentUse
 async function loadConversations(){
  const {data,error}=await supabase.from('tw_conversations').select('id,buyer_id,seller_id,created_at,last_message_at').order('last_message_at',{ascending:false});
  if(error){$('conversationList').innerHTML='<div class="empty">دریافت پیام‌ها ناموفق بود: '+esc(error.message)+'</div>';return}
- conversations=data||[];renderConversations()
+ conversations=data||[];
+ const {data:contacts}=await supabase.rpc('tw_conversation_contacts');contactNames=Object.fromEntries((contacts||[]).map(x=>[x.conversation_id,x.display_name]));
+ await refreshUnreadCounts();renderConversations()
+}
+async function refreshUnreadCounts(){
+ const {data,error}=await supabase.from('tw_messages').select('id,conversation_id').neq('sender_id',currentUser.id).is('read_at',null);
+ if(error){unreadCounts={};return}
+ unreadCounts={};(data||[]).forEach(m=>unreadCounts[m.conversation_id]=(unreadCounts[m.conversation_id]||0)+1);
 }
 function renderConversations(){
  const box=$('conversationList');if(!conversations.length){box.innerHTML='<div class="empty">هنوز گفت‌وگویی ندارید. از صفحه یک محصول، گزینه «پیام به فروشنده» را بزنید.</div>';return}
- box.innerHTML=conversations.map(c=>{const mine=c.buyer_id===currentUser.id;const label=mine?'گفت‌وگو با فروشنده':'گفت‌وگو با مشتری';return '<button class="conversation" data-id="'+c.id+'"><span class="avatar">'+(mine?'ف':'م')+'</span><span class="meta"><b>'+label+'</b><small>شناسه گفت‌وگو: '+c.id.slice(0,8)+'</small></span><span class="time">'+fmt(c.last_message_at)+'</span></button>'}).join('');
+ box.innerHTML=conversations.map(c=>{const mine=c.buyer_id===currentUser.id;const label=contactNames[c.id]||(mine?'فروشنده':'مشتری');const unread=unreadCounts[c.id]||0;return '<button class="conversation" data-id="'+c.id+'"><span class="avatar">'+esc(label.slice(0,1))+'</span><span class="meta"><b>'+esc(label)+(unread?'<span class="unread">'+unread+'</span>':'')+'</b><small>'+(unread?'پیام خوانده‌نشده':'گفت‌وگوی خصوصی')+'</small></span><span class="time">'+fmt(c.last_message_at)+'</span></button>'}).join('');
  box.querySelectorAll('[data-id]').forEach(b=>b.addEventListener('click',()=>openConversation(b.dataset.id)))
 }
 async function openOrCreateConversation(sellerId){
@@ -97,23 +104,30 @@ async function openConversation(id,label){
  const c=conversations.find(x=>x.id===id);if(!c)return;
  activeConversation=c;$('conversationList').classList.add('hidden');$('chat').style.display='block';
  $('chatName').textContent=label|| (c.buyer_id===currentUser.id?'گفت‌وگو با فروشنده':'گفت‌وگو با مشتری');
- await loadMessages();
+ await loadMessages();await markConversationRead();
  if(realtimeChannel)await supabase.removeChannel(realtimeChannel);
  realtimeChannel=supabase.channel('tw-chat-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'tw_messages',filter:'conversation_id=eq.'+id},payload=>{
-  const m=payload.new;if(m.sender_id!==currentUser.id)appendMessage(m); 
- }).subscribe();
+  const m=payload.new;if(m.sender_id!==currentUser.id){appendMessage(m);markConversationRead();if(document.hidden&&'Notification'in window&&Notification.permission==='granted')new Notification('پیام جدید در TABRIZ WORLD',{body:String(m.body||'').slice(0,100)});}
+ }).on('postgres_changes',{event:'UPDATE',schema:'public',table:'tw_messages',filter:'conversation_id=eq.'+id},payload=>updateMessageReadState(payload.new)).subscribe();
 }
+async function markConversationRead(){
+ if(!activeConversation)return;
+ const {error}=await supabase.from('tw_messages').update({read_at:new Date().toISOString()}).eq('conversation_id',activeConversation.id).neq('sender_id',currentUser.id).is('read_at',null);
+ if(error){showNotice('به‌روزرسانی وضعیت خواندن پیام انجام نشد: '+error.message);return}
+ await refreshUnreadCounts();renderConversations();
+}
+function updateMessageReadState(m){const el=document.querySelector('[data-message-id="'+m.id+'"]');if(!el||m.sender_id!==currentUser.id)return;const stamp=el.querySelector('.stamp');if(stamp)stamp.textContent=fmt(m.created_at)+' · '+(m.read_at?'خوانده شد':'ارسال شد')}
 async function loadMessages(){
- const {data,error}=await supabase.from('tw_messages').select('id,conversation_id,sender_id,body,created_at').eq('conversation_id',activeConversation.id).order('created_at',{ascending:true}).limit(300);
+ const {data,error}=await supabase.from('tw_messages').select('id,conversation_id,sender_id,body,created_at,read_at').eq('conversation_id',activeConversation.id).order('created_at',{ascending:true}).limit(300);
  if(error){$('messages').innerHTML='<div class="empty">دریافت پیام‌ها ناموفق بود: '+esc(error.message)+'</div>';return}
  $('messages').innerHTML='';if(!data?.length){$('messages').innerHTML='<div class="empty">هنوز پیامی ارسال نشده است.</div>';return}
  data.forEach(appendMessage)
 }
-function appendMessage(m){if(document.querySelector('[data-message-id="'+m.id+'"]'))return;const empty=$('messages').querySelector('.empty');if(empty)empty.remove();const el=document.createElement('div');el.className='bubble'+(m.sender_id===currentUser.id?' mine':'');el.dataset.messageId=m.id;el.textContent=m.body;const stamp=document.createElement('div');stamp.className='stamp';stamp.textContent=fmt(m.created_at);el.appendChild(stamp);$('messages').appendChild(el);$('messages').scrollTop=$('messages').scrollHeight}
+function appendMessage(m){if(document.querySelector('[data-message-id="'+m.id+'"]'))return;const empty=$('messages').querySelector('.empty');if(empty)empty.remove();const el=document.createElement('div');el.className='bubble'+(m.sender_id===currentUser.id?' mine':'');el.dataset.messageId=m.id;el.textContent=m.body;const stamp=document.createElement('div');stamp.className='stamp';stamp.textContent=fmt(m.created_at)+(m.sender_id===currentUser.id?(m.read_at?' · خوانده شد':' · ارسال شد'):'');el.appendChild(stamp);$('messages').appendChild(el);$('messages').scrollTop=$('messages').scrollHeight}
 $('messageForm').addEventListener('submit',async e=>{
  e.preventDefault();const body=$('messageInput').value.trim();if(!body||!activeConversation)return;
  const button=$('messageForm').querySelector('button');button.disabled=true;
- const {data,error}=await supabase.from('tw_messages').insert({conversation_id:activeConversation.id,sender_id:currentUser.id,body}).select('id,conversation_id,sender_id,body,created_at').single();
+ const {data,error}=await supabase.from('tw_messages').insert({conversation_id:activeConversation.id,sender_id:currentUser.id,body}).select('id,conversation_id,sender_id,body,created_at,read_at').single();
  button.disabled=false;if(error){showNotice('ارسال پیام انجام نشد: '+error.message);return}
  $('messageInput').value='';appendMessage(data)
 });
