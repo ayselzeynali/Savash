@@ -11,6 +11,7 @@ on:
       - "manifest.webmanifest"
       - "sw.js"
       - "savash-bg.jpg"
+      - "savash-track-5.mp3"
       - "assets/savash-theme.mp3"
       - ".github/workflows/android-apk.yml"
 
@@ -41,6 +42,8 @@ jobs:
           cp manifest.webmanifest www/manifest.webmanifest
           test -s savash-bg.jpg
           cp savash-bg.jpg www/savash-bg.jpg
+          test -s savash-track-5.mp3
+          cp savash-track-5.mp3 www/savash-track-5.mp3
           if [ -s assets/savash-theme.mp3 ]; then
             cp assets/savash-theme.mp3 www/assets/savash-theme.mp3
           fi
