@@ -70,11 +70,11 @@ const $=id=>document.getElementById(id);
 let phoneNumber='',latitude=null,longitude=null;
 function toast(message){$('toast').textContent=message;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',3000)}
 function normalizePhone(value){
- let v=value.replace(/[\\s()-]/g,'');
- if(/^09\\d{9}$/.test(v))return '+98'+v.slice(1);
- if(/^9\\d{9}$/.test(v))return '+98'+v;
- if(/^98\\d{10}$/.test(v))return '+'+v;
- if(/^\\+\\d{10,15}$/.test(v))return v;
+ let v=value.replace(/[\s()-]/g,'');
+ if(/^09\d{9}$/.test(v))return '+98'+v.slice(1);
+ if(/^9\d{9}$/.test(v))return '+98'+v;
+ if(/^98\d{10}$/.test(v))return '+'+v;
+ if(/^\+\d{10,15}$/.test(v))return v;
  return '';
 }
 async function showSession(){
@@ -107,7 +107,7 @@ $('sendOtp').addEventListener('click',async()=>{
 });
 $('verifyOtp').addEventListener('click',async()=>{
  const token=$('otp').value.trim();
- if(!/^\\d{6}$/.test(token)){toast('کد تأیید باید ۶ رقم باشد.');return}
+ if(!/^\d{6}$/.test(token)){toast('کد تأیید باید ۶ رقم باشد.');return}
  $('verifyOtp').disabled=true;
  const {error}=await supabase.auth.verifyOtp({phone:phoneNumber,token,type:'sms'});
  $('verifyOtp').disabled=false;
@@ -128,7 +128,7 @@ $('saveProfile').addEventListener('click',async()=>{
  if(!user){toast('ابتدا وارد حساب شو.');return}
  const fullName=$('fullName').value.trim(),streetAddress=$('streetAddress').value.trim(),postalCode=$('postalCode').value.trim();
  if(!fullName||!streetAddress){toast('نام کامل و نشانی خیابان را وارد کن.');return}
- if(postalCode&&!/^\\d{10}$/.test(postalCode)){toast('کد پستی باید ۱۰ رقم باشد.');return}
+ if(postalCode&&!/^\d{10}$/.test(postalCode)){toast('کد پستی باید ۱۰ رقم باشد.');return}
  const row={user_id:user.id,full_name:fullName,province:$('province').value.trim(),city:$('city').value.trim(),neighborhood:$('neighborhood').value.trim(),postal_code:postalCode,street_address:streetAddress,building_number:$('buildingNumber').value.trim(),unit_number:$('unitNumber').value.trim(),latitude,longitude,updated_at:new Date().toISOString()};
  $('saveProfile').disabled=true;
  const {error}=await supabase.from('tw_customer_profiles').upsert(row,{onConflict:'user_id'});
