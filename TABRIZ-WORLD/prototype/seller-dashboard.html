@@ -90,13 +90,13 @@ const $=id=>document.getElementById(id);
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab))}));
 const PRODUCT_KEY='tw_seller_products_v1';let products=[];let selectedPhoto='';
 function loadProducts(){try{products=JSON.parse(localStorage.getItem(PRODUCT_KEY)||'[]')}catch(e){products=[]}renderProducts()}
-function renderProducts(){$('productCount').textContent=products.length;$('productList').innerHTML=products.map((x,i)=>'<div class="item">'+(x.photo?'<img src="'+x.photo+'" alt="" style="width:100%;height:115px;object-fit:cover;border-radius:8px">':'')+'<b>'+escapeHtml(x.n)+'</b><p class="muted">'+escapeHtml(x.shopName||'')+' · '+escapeHtml(x.c)+'</p><strong>'+Number(x.p).toLocaleString('fa-IR')+' تومان</strong><br><small>موجودی: '+escapeHtml(x.s)+'</small><p><button class="btn" onclick="removeProduct('+i+')">حذف</button></p></div>').join('')}
+function renderProducts(){$('productCount').textContent=cloudProducts.length;$('productList').innerHTML=products.map((x,i)=>'<div class="item">'+(x.photo?'<img src="'+x.photo+'" alt="" style="width:100%;height:115px;object-fit:cover;border-radius:8px">':'')+'<b>'+escapeHtml(x.n)+'</b><p class="muted">'+escapeHtml(x.shopName||'')+' · '+escapeHtml(x.c)+'</p><strong>'+Number(x.p).toLocaleString('fa-IR')+' تومان</strong><br><small>موجودی: '+escapeHtml(x.s)+'</small><p><button class="btn" onclick="removeProduct('+i+')">حذف</button></p></div>').join('')}
 function removeProduct(i){products.splice(i,1);localStorage.setItem(PRODUCT_KEY,JSON.stringify(products));renderProducts();toast('محصول حذف شد')}
 function readProductPhoto(file){if(!file)return;if(!file.type.startsWith('image/')){toast('فقط فایل عکس انتخاب کن');return}const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const max=1000,scale=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);selectedPhoto=c.toDataURL('image/jpeg',.78);$('photoPreview').src=selectedPhoto;$('photoPreview').style.display='block';$('photoHint').textContent='عکس آماده ثبت است.'};img.src=reader.result};reader.readAsDataURL(file)}
 $('productPhoto').addEventListener('change',e=>readProductPhoto(e.target.files[0]));$('productGallery').addEventListener('change',e=>readProductPhoto(e.target.files[0]));
 function toast(s){$('toast').textContent=s;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',2200)}
 function saveProfile(){const n=$('shopName').value.trim();if(!n){toast('نام فروشگاه را وارد کن');return}$('welcome').textContent='پیش‌نویس فروشگاه «'+n+'» ثبت شد. برای انتشار باید بررسی و تأیید شود.';toast('پیش‌نویس اطلاعات فروشگاه ذخیره شد')}
-function addProduct(){const n=$('productName').value.trim(),p=$('productPrice').value.trim(),s=$('productStock').value.trim();if(!n||!p||!s){toast('نام، قیمت و موجودی را کامل کن');return}if(!/^\\d+(\\.\\d+)?$/.test(p)||!/^\\d+$/.test(s)){toast('قیمت و موجودی باید عددی باشند');return}const shopId=$('productShop').value;const names=['پوشاک تبریز','سوغات و شیرینی','صنایع دستی','موبایل و دیجیتال','کیف و کفش'];products.push({id:Date.now().toString(),n,p,s,c:$('productCategory').value,shopId,shopName:names[Number(shopId)],description:$('productDescription').value.trim(),photo:selectedPhoto,createdAt:Date.now()});try{localStorage.setItem(PRODUCT_KEY,JSON.stringify(products))}catch(e){products.pop();toast('فضای ذخیره عکس‌ها پر شده است؛ عکس کوچک‌تری انتخاب کن');return}renderProducts();$('productName').value='';$('productPrice').value='';$('productStock').value='';$('productDescription').value='';selectedPhoto='';$('photoPreview').removeAttribute('src');$('photoPreview').style.display='none';$('photoHint').textContent='عکس محصول را با دوربین گوشی بگیر یا از گالری انتخاب کن.';toast('محصول در این مرورگر ثبت شد؛ فروشگاه سه‌بعدی را باز کن')}
+function addProduct(){const n=$('productName').value.trim(),p=$('productPrice').value.trim(),s=$('productStock').value.trim();if(!n||!p||!s){toast('نام، قیمت و موجودی را کامل کن');return}if(!/^\\d+(\\.\\d+)?$/.test(p)||!/^\\d+$/.test(s)){toast('قیمت و موجودی باید عددی باشند');return}const shopId=$('productShop').value;const names=['پوشاک تبریز','سوغات و شیرینی','صنایع دستی','موبایل و دیجیتال','کیف و کفش'];products.push({id:Date.now().toString(),n,p,s,c:$('productCategory').value,shopId,shopName:names[Number(shopId)],description:$('productDescription').value.trim(),photo:selectedPhoto,createdAt:Date.now()});try{localStorage.setItem(PRODUCT_KEY,JSON.stringify(products))}catch(e){products.pop();toast('فضای ذخیره عکس‌ها پر شده است؛ عکس کوچک‌تری انتخاب کن');return}renderProducts();$('productName').value='';$('productPrice').value='';$('productStock').value='';$('productDescription').value='';$('photoPreview').removeAttribute('src');$('photoPreview').style.display='none';$('photoHint').textContent='عکس محصول را با دوربین گوشی بگیر یا از گالری انتخاب کن.';toast('محصول در این مرورگر ثبت شد؛ فروشگاه سه‌بعدی را باز کن')}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 loadProducts();
 function changeOrder(id){const e=$(id);e.textContent=e.textContent==='جدید'?'در حال آماده‌سازی':e.textContent==='در حال آماده‌سازی'?'آماده ارسال':'آماده ارسال';toast('وضعیت سفارش در نمونه تغییر کرد')}
@@ -108,6 +108,7 @@ const TW_URL='https://msiiyofbjymwjwgfjbpw.supabase.co';
 const TW_KEY='sb_publishable_d8eYB6N-49hGZIPVma8HuQ_EwAX1tSW';
 const cloud=createClient(TW_URL,TW_KEY);
 let cloudUser=null;
+let cloudProducts=[];
 const shopNames=['پوشاک تبریز','سوغات و شیرینی','صنایع دستی','موبایل و دیجیتال','کیف و کفش'];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function setAuthUI(){
@@ -118,21 +119,21 @@ function setAuthUI(){
  document.getElementById('cloudSignUp').style.display=cloudUser?'none':'inline-block';
 }
 async function cloudLoadProducts(){
- if(!cloudUser){products=[];renderCloudProducts();return}
+ if(!cloudUser){cloudProducts=[];renderCloudProducts();return}
  const {data,error}=await cloud.from('tw_products').select('*').eq('seller_id',cloudUser.id).order('created_at',{ascending:false});
  if(error){toast('خطا در دریافت محصولات: '+error.message);return}
- products=(data||[]).map(p=>({...p,n:p.name,p:String(p.price_toman),s:String(p.stock),c:p.category,shopId:String(p.shop_id),shopName:shopNames[p.shop_id],photo:p.image_path?cloud.storage.from('tw-product-images').getPublicUrl(p.image_path).data.publicUrl:'',description:p.description}));
+ cloudProducts=(data||[]).map(p=>({...p,n:p.name,p:String(p.price_toman),s:String(p.stock),c:p.category,shopId:String(p.shop_id),shopName:shopNames[p.shop_id],photo:p.image_path?cloud.storage.from('tw-product-images').getPublicUrl(p.image_path).data.publicUrl:'',description:p.description}));
  renderCloudProducts();
 }
 function renderCloudProducts(){
  $('productCount').textContent=products.length;
- $('productList').innerHTML=products.map((p,i)=>'<div class="item">'+(p.photo?'<img src="'+esc(p.photo)+'" alt="" style="width:100%;height:115px;object-fit:cover;border-radius:8px">':'')+'<b>'+esc(p.n)+'</b><p class="muted">'+esc(p.shopName)+' · '+esc(p.c)+'</p><strong>'+Number(p.p).toLocaleString('fa-IR')+' تومان</strong><br><small>موجودی: '+esc(p.s)+' · وضعیت: '+esc(p.status==='approved'?'تأیید شده':p.status==='rejected'?'رد شده':'در انتظار بررسی')+'</small><p><button class="btn" onclick="removeProduct(\''+p.id+'\')">حذف</button></p></div>').join('');
+ $('productList').innerHTML=cloudProducts.map((p,i)=>'<div class="item">'+(p.photo?'<img src="'+esc(p.photo)+'" alt="" style="width:100%;height:115px;object-fit:cover;border-radius:8px">':'')+'<b>'+esc(p.n)+'</b><p class="muted">'+esc(p.shopName)+' · '+esc(p.c)+'</p><strong>'+Number(p.p).toLocaleString('fa-IR')+' تومان</strong><br><small>موجودی: '+esc(p.s)+' · وضعیت: '+esc(p.status==='approved'?'تأیید شده':p.status==='rejected'?'رد شده':'در انتظار بررسی')+'</small><p><button class="btn" onclick="removeProduct(\''+p.id+'\')">حذف</button></p></div>').join('');
 }
 window.loadProducts=cloudLoadProducts;
 window.renderProducts=renderCloudProducts;
 window.removeProduct=async(id)=>{
  if(!cloudUser)return toast('ابتدا وارد حساب فروشنده شو');
- const p=products.find(x=>x.id===id);if(!p)return;
+ const p=cloudProducts.find(x=>x.id===id);if(!p)return;
  const {error}=await cloud.from('tw_products').delete().eq('id',id);
  if(error){toast('حذف انجام نشد: '+error.message);return}
  if(p.image_path) await cloud.storage.from('tw-product-images').remove([p.image_path]);
@@ -143,11 +144,11 @@ window.addProduct=async()=>{
  const n=$('productName').value.trim(),price=$('productPrice').value.trim(),stock=$('productStock').value.trim();
  if(!n||!price||!stock){toast('نام، قیمت و موجودی را کامل کن');return}
  if(!/^\d+(\.\d+)?$/.test(price)||!/^\d+$/.test(stock)||Number(price)<=0){toast('قیمت و موجودی باید عددی و معتبر باشند');return}
- if(!selectedPhoto){toast('ابتدا عکس محصول را بگیر یا انتخاب کن');return}
+ const photoData=$('photoPreview').getAttribute('src');if(!photoData){toast('ابتدا عکس محصول را بگیر یا انتخاب کن');return}
  const shopId=Number($('productShop').value);
  let imagePath=null;
  try{
-  const blob=await (await fetch(selectedPhoto)).blob();
+  const blob=await (await fetch(photoData)).blob();
   imagePath=cloudUser.id+'/'+crypto.randomUUID()+'.jpg';
   const {error:uploadError}=await cloud.storage.from('tw-product-images').upload(imagePath,blob,{contentType:'image/jpeg',upsert:false});
   if(uploadError)throw uploadError;
@@ -182,7 +183,7 @@ document.getElementById('cloudSignUp').addEventListener('click',async()=>{
  else toast('لینک تأیید به ایمیلت ارسال شد؛ پس از تأیید، وارد حساب شو.');
 });
 document.getElementById('cloudSignOut').addEventListener('click',async()=>{
- await cloud.auth.signOut();cloudUser=null;products=[];setAuthUI();renderCloudProducts();toast('از حساب خارج شدی');
+ await cloud.auth.signOut();cloudUser=null;cloudProducts=[];setAuthUI();renderCloudProducts();toast('از حساب خارج شدی');
 });
 const {data:{user}}=await cloud.auth.getUser();cloudUser=user||null;setAuthUI();await cloudLoadProducts();
 // Auth state is loaded on page start and updated by the explicit sign-in/sign-out handlers.
