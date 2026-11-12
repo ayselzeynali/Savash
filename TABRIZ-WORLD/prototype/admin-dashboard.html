@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111b25"><title>مدیریت TABRIZ WORLD</title>
+<style>
+:root{color-scheme:dark;--bg:#101820;--panel:#1b2833;--line:#31414d;--gold:#d9b36c;--muted:#aab8c2;--green:#2d9b70;--red:#b94b4b}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(150deg,#101820,#172631);color:#f4f1e9;font-family:Tahoma,Arial,sans-serif;min-height:100vh}
+header{padding:22px max(16px,calc((100% - 1100px)/2));border-bottom:1px solid var(--line);background:#111d26}
+h1{margin:0;font-size:22px}header p{color:var(--muted);margin:8px 0 0;font-size:13px}
+main{max-width:1100px;margin:24px auto;padding:0 14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 7px}input,select{width:100%;background:#101a22;border:1px solid var(--line);border-radius:9px;padding:12px;color:white;font:inherit}
+button{border:0;border-radius:9px;padding:11px 16px;font:inherit;font-weight:bold;cursor:pointer;background:var(--gold);color:#17212a}
+button.secondary{background:#344552;color:white}button.good{background:var(--green);color:white}button.bad{background:var(--red);color:white}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.muted{color:var(--muted);font-size:13px;line-height:1.8}
+#dashboard{display:none}.toolbar{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.product{background:#14212a;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.product img{width:100%;height:190px;object-fit:cover;background:#0c141a}.body{padding:14px}.body h3{margin:0 0 8px;font-size:17px}.meta{font-size:12px;color:var(--muted);line-height:1.9}.price{color:var(--gold);font-weight:bold;margin:10px 0}
+.status{display:inline-block;padding:5px 9px;border-radius:30px;background:#344552;font-size:11px}.empty{text-align:center;color:var(--muted);padding:30px}
+@media(max-width:560px){.toolbar{grid-template-columns:1fr}header{padding:18px 14px}main{margin:14px auto}}
+</style>
+</head>
+<body>
+<header><h1>پنل مدیریت TABRIZ WORLD</h1><p>بررسی و تأیید محصولات فروشندگان تبریز</p></header>
+<main>
+<section class="panel" id="loginPanel">
+<h2>ورود مدیر</h2><p class="muted">فقط حساب‌هایی که دسترسی مدیریت برایشان فعال شده است می‌توانند وارد این بخش شوند.</p>
+<label for="email">ایمیل مدیر</label><input id="email" type="email" autocomplete="username" placeholder="ایمیل حساب مدیر">
+<label for="password">رمز عبور</label><input id="password" type="password" autocomplete="current-password" placeholder="رمز عبور">
+<div class="actions"><button id="loginBtn">ورود امن</button></div><p id="loginMessage" class="muted" role="status"></p>
+</section>
+<section id="dashboard">
+<div class="panel">
+<div class="actions" style="justify-content:space-between;align-items:center"><div><b id="adminIdentity"></b><div class="muted">مدیریت محصولات ثبت‌شده در بازار تبریز</div></div><button class="secondary" id="logoutBtn">خروج</button></div>
+<div class="toolbar">
+<div><label for="statusFilter">وضعیت محصولات</label><select id="statusFilter"><option value="pending">در انتظار بررسی</option><option value="approved">تأییدشده</option><option value="rejected">ردشده</option><option value="all">همه محصولات</option></select></div>
+<div class="actions"><button id="refreshBtn" class="secondary">به‌روزرسانی فهرست</button></div>
+</div><p id="count" class="muted"></p>
+</div>
+<div id="products" class="cards"><div class="empty">در حال دریافت محصولات…</div></div>
+</section>
+</main>
+<script type="module">
+import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.119.0';
+const db=createClient('https://msiiyofbjymwjwgfjbpw.supabase.co','sb_publishable_d8eYB6N-49hGZIPVma8HuQ_EwAX1tSW');
+const $=id=>document.getElementById(id);
+const shops=['پوشاک تبریز','سوغات و شیرینی','صنایع دستی','موبایل و دیجیتال','کیف و کفش'];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let admin=null;
+function message(s){$('loginMessage').textContent=s}
+async function checkAdmin(user){
+ if(!user){admin=null;$('dashboard').style.display='none';$('loginPanel').style.display='block';return false}
+ const {data,error}=await db.from('tw_admins').select('user_id').eq('user_id',user.id).maybeSingle();
+ if(error||!data){admin=null;$('dashboard').style.display='none';$('loginPanel').style.display='block';message('این حساب هنوز دسترسی مدیریت ندارد. مدیر اصلی باید دسترسی آن را در Supabase فعال کند.');return false}
+ admin=user;$('adminIdentity').textContent='مدیر: '+(user.email||user.id);$('loginPanel').style.display='none';$('dashboard').style.display='block';await loadProducts();return true
+}
+async function loadProducts(){
+ if(!admin)return;
+ $('products').innerHTML='<div class="empty">در حال بارگذاری…</div>';
+ const filter=$('statusFilter').value;
+ let q=db.from('tw_products').select('id,seller_id,shop_id,name,description,category,price_toman,stock,image_path,status,created_at').order('created_at',{ascending:false}).limit(100);
+ if(filter!=='all')q=q.eq('status',filter);
+ const {data,error}=await q;
+ if(error){$('products').innerHTML='<div class="empty">خطا در دریافت محصولات: '+esc(error.message)+'</div>';return}
+ $('count').textContent=(data?.length||0).toLocaleString('fa-IR')+' محصول در این فهرست';
+ if(!data?.length){$('products').innerHTML='<div class="panel empty">محصولی در این وضعیت وجود ندارد.</div>';return}
+ $('products').innerHTML=data.map(p=>{
+  const image=p.image_path?db.storage.from('tw-product-images').getPublicUrl(p.image_path).data.publicUrl:'';
+  const state=p.status==='approved'?'تأیید شده':p.status==='rejected'?'رد شده':'در انتظار بررسی';
+  return '<article class="product">'+(image?'<img src="'+esc(image)+'" alt="'+esc(p.name)+'">':'')+'<div class="body"><h3>'+esc(p.name)+'</h3><div class="meta">فروشگاه: '+esc(shops[p.shop_id]||'نامشخص')+'<br>دسته‌بندی: '+esc(p.category)+'<br>شناسه فروشنده: '+esc(p.seller_id)+'<br>ثبت: '+new Date(p.created_at).toLocaleString('fa-IR')+'</div><p>'+esc(p.description||'بدون توضیحات')+'</p><div class="price">'+Number(p.price_toman).toLocaleString('fa-IR')+' تومان · موجودی '+Number(p.stock).toLocaleString('fa-IR')+'</div><span class="status">'+state+'</span><div class="actions">'+(p.status!=='approved'?'<button class="good" data-action="approve" data-id="'+p.id+'">تأیید و انتشار</button>':'')+(p.status!=='rejected'?'<button class="bad" data-action="reject" data-id="'+p.id+'">رد محصول</button>':'')+'</div></div></article>';
+ }).join('');
+}
+async function moderate(id,status){
+ const label=status==='approved'?'تأیید و انتشار':'رد محصول';
+ if(!confirm('آیا از '+label+' اطمینان داری؟'))return;
+ const {error}=await db.from('tw_products').update({status,updated_at:new Date().toISOString()}).eq('id',id);
+ if(error){alert('تغییر وضعیت انجام نشد: '+error.message);return}
+ await loadProducts();
+}
+$('loginBtn').addEventListener('click',async()=>{
+ const email=$('email').value.trim(),password=$('password').value;
+ if(!email||!password){message('ایمیل و رمز عبور را وارد کن.');return}
+ $('loginBtn').disabled=true;message('در حال ورود…');
+ const {data,error}=await db.auth.signInWithPassword({email,password});
+ $('loginBtn').disabled=false;
+ if(error){message('ورود ناموفق: '+error.message);return}
+ await checkAdmin(data.user);
+});
+$('logoutBtn').addEventListener('click',async()=>{await db.auth.signOut();admin=null;$('dashboard').style.display='none';$('loginPanel').style.display='block';message('از حساب خارج شدی.')});
+$('refreshBtn').addEventListener('click',loadProducts);
+$('statusFilter').addEventListener('change',loadProducts);
+$('products').addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b)moderate(b.dataset.id,b.dataset.action==='approve'?'approved':'rejected')});
+const {data:{user}}=await db.auth.getUser();if(user)await checkAdmin(user);
+</script>
+</body></html>
