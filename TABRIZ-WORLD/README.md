@@ -43,6 +43,11 @@ This repository folder is the project foundation and mobile UI prototype. It is 
 - Follow [`docs/ADMIN-SETUP.md`](docs/ADMIN-SETUP.md) to grant the first administrator access securely.
 - Seller identity/business verification, orders, refunds, and live bank payments are not implemented yet.
 
+## Customer phone account and home address
+- Open [`prototype/account.html`](prototype/account.html) to sign in using a mobile number and SMS OTP without email or password.
+- The page saves the customer's name and primary home delivery address in `public.tw_customer_profiles`; RLS restricts each profile to its own authenticated user. Optional browser geolocation can store coordinates with the address.
+- Phone OTP requires the Supabase Phone provider and an SMS provider. Fixed test OTPs must be configured for specific test phone numbers in Supabase Auth; do not ship a shared OTP. The requested five-digit `12395` is not supported by the standard six-digit OTP configuration; use a six-digit test code such as `012395` for a configured test number.
+
 ## Buyer-seller text messaging
 - `prototype/text-chat.html` is a mobile-friendly preview of the text-message interface.
 - Live voice calls and microphone access are not part of the product direction.
