@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1720"><title>پیام‌ها | TABRIZ WORLD</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1720;--panel:#142832;--line:#35505b;--gold:#e8bd70;--muted:#b8c9ce}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#0b1720,#172d36);color:#fff;font-family:Tahoma,Arial,sans-serif;min-height:100vh}
+header{padding:18px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}header button{background:#1b3740;border:1px solid #587078;color:white;border-radius:10px;padding:9px 12px}header b{color:var(--gold)}
+main{max-width:680px;margin:20px auto;padding:0 14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+h1{font-size:19px;margin:0}.sub{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.8}
+.notice{margin:14px;padding:11px;border:1px dashed #8b744c;border-radius:10px;color:#e7d7b7;font-size:11px;line-height:2}
+.conversations{padding:8px 14px}.conversation{width:100%;display:flex;align-items:center;gap:12px;text-align:right;background:transparent;border:0;border-bottom:1px solid var(--line);padding:14px 2px;color:white;font:inherit;cursor:pointer}
+.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#3a514c;color:#f0cf91;font-weight:bold;flex:none}.meta{flex:1;min-width:0}.meta b{display:block;font-size:13px}.meta small{display:block;color:var(--muted);font-size:11px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.time{font-size:10px;color:var(--muted)}
+.chat{display:none;border-top:1px solid var(--line)}.chat-head{padding:13px 15px;display:flex;justify-content:space-between;align-items:center}.chat-head button{background:#304951;color:white;border:0;border-radius:8px;padding:8px 10px}
+.messages{height:min(48vh,430px);overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:#0d2028}
+.bubble{max-width:82%;padding:10px 12px;border-radius:13px;font-size:12px;line-height:1.9;background:#25414a;align-self:flex-start;white-space:pre-wrap;overflow-wrap:anywhere}.bubble.mine{background:#6c5635;align-self:flex-end}
+.composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}.composer input{min-width:0;flex:1;background:#0b1d25;color:white;border:1px solid #45616a;border-radius:10px;padding:12px;font:inherit;font-size:12px}.composer button{border:0;border-radius:10px;padding:0 17px;background:var(--gold);color:#17252a;font-weight:bold}
+.empty{padding:22px;text-align:center;color:var(--muted);font-size:12px}
+</style></head>
+<body>
+<header><button onclick="location.href='index.html'">← بازگشت</button><div><b>TABRIZ WORLD</b><div style="font-size:11px;color:#bdc9cd;margin-top:4px">پیام‌های مشتری و فروشنده</div></div></header>
+<main><section class="card">
+<div style="padding:16px 15px 4px"><h1>💬 پیام‌ها</h1><div class="sub">گفت‌وگوی نوشتاری؛ بدون تماس صوتی و دسترسی به میکروفون</div></div>
+<div class="notice">این صفحه فعلاً پیش‌نمایش رابط پیام‌رسان است. پیام‌های آزمایشی فقط در همین مرورگر ذخیره می‌شوند و هنوز به حساب کاربران دیگر ارسال نمی‌شوند. برای چت واقعی بین حساب مشتری و فروشنده، ورود امن کاربران و پایگاه‌داده/سرور پیام‌رسان باید متصل شود.</div>
+<div id="conversationList" class="conversations">
+<button class="conversation" onclick="openChat('seller-demo','فروشگاه نمونه تبریز')"><span class="avatar">ف</span><span class="meta"><b>فروشگاه نمونه تبریز</b><small>برای شروع گفت‌وگو پیام بفرستید</small></span><span class="time">نمونه</span></button>
+<button class="conversation" onclick="openChat('buyer-demo','مشتری نمونه')"><span class="avatar">م</span><span class="meta"><b>مشتری نمونه</b><small>گفت‌وگوی آزمایشی</small></span><span class="time">نمونه</span></button>
+</div>
+<section id="chat" class="chat">
+<div class="chat-head"><div><b id="chatName">گفت‌وگو</b><div class="sub">پیام متنی</div></div><button onclick="closeChat()">فهرست پیام‌ها</button></div>
+<div id="messages" class="messages"><div class="empty">هنوز پیامی ارسال نشده است.</div></div>
+<form class="composer" id="messageForm"><input id="messageInput" maxlength="2000" autocomplete="off" placeholder="پیام خود را بنویسید…" aria-label="متن پیام"><button type="submit">ارسال</button></form>
+</section>
+</section></main>
+<script>
+const storeKey='tw_text_chat_demo_v1';let activeChat='';
+const $=id=>document.getElementById(id);
+function readStore(){try{return JSON.parse(localStorage.getItem(storeKey)||'{}')}catch{return {}}}
+function saveStore(data){localStorage.setItem(storeKey,JSON.stringify(data))}
+function openChat(id,name){activeChat=id;$('chatName').textContent=name;$('conversationList').style.display='none';$('chat').style.display='block';renderMessages();$('messageInput').focus()}
+function closeChat(){activeChat='';$('chat').style.display='none';$('conversationList').style.display='block'}
+function renderMessages(){const all=readStore(),items=all[activeChat]||[];const box=$('messages');box.innerHTML='';if(!items.length){box.innerHTML='<div class="empty">هنوز پیامی ارسال نشده است.</div>';return}for(const item of items){const el=document.createElement('div');el.className='bubble'+(item.mine?' mine':'');el.textContent=item.text;box.appendChild(el)}box.scrollTop=box.scrollHeight}
+$('messageForm').addEventListener('submit',e=>{e.preventDefault();const message=$('messageInput').value.trim();if(!message||!activeChat)return;const all=readStore();all[activeChat]=all[activeChat]||[];all[activeChat].push({text:message,mine:true,at:Date.now()});saveStore(all);$('messageInput').value='';renderMessages()});
+</script></body></html>
