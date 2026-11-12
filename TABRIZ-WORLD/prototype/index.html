@@ -31,6 +31,13 @@ nav button{background:none;border:0;color:#d8e2e2;font-size:11px}
 .joystick{position:absolute;bottom:calc(28px + env(safe-area-inset-bottom));right:20px;width:116px;height:116px;border-radius:50%;border:1px solid #a4b6b777;background:#07161a88;touch-action:none}
 .stick{position:absolute;width:48px;height:48px;left:34px;top:34px;border-radius:50%;background:#e8bd70cc;border:2px solid #fff8;box-shadow:0 3px 12px #0008}
 .hint{position:absolute;bottom:calc(155px + env(safe-area-inset-bottom));right:18px;font-size:10px;color:#d8e2e2;background:#07161acc;padding:8px 10px;border-radius:10px}
+.shop-modal{position:absolute;inset:0;background:#061117b8;display:none;align-items:center;justify-content:center;padding:18px;pointer-events:auto}
+.shop-card{width:min(430px,100%);max-height:78vh;overflow:auto;background:#122832;border:1px solid #9b8058;border-radius:19px;padding:17px;box-shadow:0 18px 60px #0009}
+.shop-card h3{margin:0 0 6px;color:#f0cf91;font-size:17px}.shop-card p{font-size:11px;color:#c0d0d2;line-height:1.8;margin:5px 0 13px}
+.product-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.product{background:#1b3740;border:1px solid #45616a;border-radius:12px;padding:11px;font-size:12px}
+.product b{display:block;margin-top:7px;color:#f0cf91}.shop-actions{display:flex;gap:8px;margin-top:13px}.shop-actions button{flex:1;border:0;border-radius:10px;padding:11px;background:#d8ad62;color:#1a2529;font-weight:bold}.shop-actions button:last-child{background:#304951;color:#fff}
+
 #toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#0b1b23ed;border:1px solid #71878b;border-radius:14px;padding:14px 18px;font-size:12px;display:none;text-align:center;max-width:80%}
 @media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}.places{grid-template-columns:repeat(4,1fr)}.hero{min-height:440px}.joystick{right:40px;bottom:35px}}
 </style>
@@ -65,6 +72,14 @@ nav button{background:none;border:0;color:#d8e2e2;font-size:11px}
 <div class="hint">برای حرکت از جوی‌استیک استفاده کن</div>
 <div class="joystick" id="joystick"><div class="stick" id="stick"></div></div>
 <div class="bottomleft"><button class="action" onclick="jump()">↑</button><button class="iconbtn" onclick="toggleView()">🎥 دوربین</button></div>
+<div id="shopModal" class="shop-modal">
+ <div class="shop-card">
+  <h3 id="shopTitle">فروشگاه تبریز</h3>
+  <p id="shopDescription">نمونه ویترین و محصولات پیشنهادی</p>
+  <div id="productList" class="product-list"></div>
+  <div class="shop-actions"><button onclick="demoOrder()">ثبت سفارش آزمایشی</button><button onclick="closeShop()">بستن</button></div>
+ </div>
+</div>
 <div id="toast"></div>
 </div>
 </section>
@@ -257,19 +272,26 @@ window.goTo=(place)=>{
  notify('به مقصد جدید رسیدی');
 };
 
+let selectedShop='';
+const shopCatalog=[
+ {name:'پوشاک تبریز',desc:'لباس روزمره و پوشاک محلی',items:[['مانتو و پوشاک زنانه','قیمت با فروشنده'],['پیراهن مردانه','قیمت با فروشنده'],['لباس کودک','قیمت با فروشنده'],['پوشاک سنتی','قیمت با فروشنده']]},
+ {name:'سوغات و شیرینی',desc:'سوغات و خوراکی‌های شناخته‌شده تبریز',items:[['قرابیه تبریز','قیمت با فروشنده'],['نوقا و لوز','قیمت با فروشنده'],['باقلوا','قیمت با فروشنده'],['آجیل و خشکبار','قیمت با فروشنده']]},
+ {name:'صنایع دستی',desc:'هنر و صنایع‌دستی آذربایجان',items:[['فرش و قالیچه','قیمت با فروشنده'],['ظروف مسی','قیمت با فروشنده'],['چرم دست‌دوز','قیمت با فروشنده'],['محصولات هنری','قیمت با فروشنده']]},
+ {name:'موبایل و دیجیتال',desc:'لوازم جانبی و محصولات دیجیتال',items:[['گوشی هوشمند','قیمت با فروشنده'],['هدفون','قیمت با فروشنده'],['شارژر و کابل','قیمت با فروشنده'],['قاب و محافظ','قیمت با فروشنده']]},
+ {name:'کیف و کفش',desc:'کیف، کفش و محصولات چرمی',items:[['کفش روزمره','قیمت با فروشنده'],['کفش چرمی','قیمت با فروشنده'],['کیف دستی','قیمت با فروشنده'],['کیف اداری','قیمت با فروشنده']]}
+];
 window.goShop=(index)=>{
- const shops=[
-  {x:24,z:-9,name:'پوشاک تبریز'},
-  {x:30,z:-9,name:'سوغات و شیرینی'},
-  {x:36,z:-9,name:'صنایع دستی'},
-  {x:42,z:-9,name:'موبایل و دیجیتال'},
-  {x:48,z:-9,name:'کیف و کفش'}
- ];
- const s=shops[index];if(!player||!s)return;
- player.position.set(s.x,0,s.z);player.rotation.set(0,0,0);
- document.getElementById('placeLabel').innerHTML='🛍️ '+s.name+'<br><small style="color:#bdc9cd">فروشگاه نمایشی · فروشنده واقعی هنوز متصل نیست</small>';
- notify('به فروشگاه '+s.name+' رسیدی');
+ const s=shopCatalog[index];if(!player||!s)return;
+ const coords=[{x:24,z:-9},{x:30,z:-9},{x:36,z:-9},{x:42,z:-9},{x:48,z:-9}][index];
+ player.position.set(coords.x,0,coords.z);player.rotation.set(0,0,0);selectedShop=s.name;
+ document.getElementById('placeLabel').innerHTML='🛍️ '+s.name+'<br><small style="color:#bdc9cd">فروشگاه نمایشی · اطلاعات قیمت با فروشنده</small>';
+ document.getElementById('shopTitle').textContent='🛍️ '+s.name;
+ document.getElementById('shopDescription').textContent=s.desc+'؛ برای خرید واقعی باید فروشنده ثبت‌نام کرده و کالا و قیمت را وارد کند.';
+ document.getElementById('productList').innerHTML=s.items.map(item=>'<div class="product">'+item[0]+'<b>'+item[1]+'</b></div>').join('');
+ document.getElementById('shopModal').style.display='flex';
 };
+window.closeShop=()=>{document.getElementById('shopModal').style.display='none'};
+window.demoOrder=()=>notify('سفارش آزمایشی است؛ پرداخت و ارسال واقعی هنوز فعال نیست.');
 window.toggleView=()=>{thirdPerson=!thirdPerson;notify(thirdPerson?'دوربین سوم‌شخص':'نمای نزدیک')};
 window.jump=()=>{if(player&&!jumping){jumping=true;jumpTime=0}};
 window.notify=(s)=>{const t=document.getElementById('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2100)};
