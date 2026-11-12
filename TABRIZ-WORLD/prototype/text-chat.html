@@ -32,7 +32,7 @@ input,button{font-family:inherit}input{min-width:0;background:#0b1d25;color:whit
  <div id="authStatus" class="status" role="status"></div>
 </div>
 <div id="appBox" class="hidden">
- <div class="pad" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span id="accountLabel" class="sub"></span><button id="signOut" class="secondary">خروج</button></div>
+ <div class="pad" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span id="accountLabel" class="sub"></span><div style="display:flex;gap:6px"><button id="enableNotifications" class="secondary" type="button">فعال‌سازی اعلان</button><button id="signOut" class="secondary">خروج</button></div></div>
  <div id="notice" class="notice hidden"></div>
  <div id="conversationList" class="conversations"><div class="empty">در حال دریافت گفت‌وگوها…</div></div>
  <section id="chat" class="chat">
@@ -73,6 +73,7 @@ $('verifyOtp').addEventListener('click',async()=>{
  status('ورود موفق بود.');await startSession()
 });
 $('backPhone').addEventListener('click',()=>{$('otpStep').classList.add('hidden');$('phoneStep').classList.remove('hidden');status('')});
+$('enableNotifications').addEventListener('click',async()=>{if(!('Notification'in window)){showNotice('این مرورگر از اعلان پشتیبانی نمی‌کند.');return}const permission=await Notification.requestPermission();showNotice(permission==='granted'?'اعلان پیام جدید فعال شد.':'اجازه اعلان داده نشد. می‌توانی از تنظیمات مرورگر آن را فعال کنی.');});
 $('signOut').addEventListener('click',async()=>{if(realtimeChannel)await supabase.removeChannel(realtimeChannel);await supabase.auth.signOut();currentUser=null;activeConversation=null;startSession()});
 supabase.auth.onAuthStateChange((_event,session)=>{if(session?.user&&!currentUser){currentUser=session.user;setTimeout(startSession,0)}});
 async function loadConversations(){
