@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1720"><title>تماس زنده | TABRIZ WORLD</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1720;--panel:#142832;--line:#35505b;--gold:#e8bd70;--muted:#b8c9ce}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#0b1720,#172d36);color:#fff;font-family:Tahoma,Arial,sans-serif;min-height:100vh}
+header{padding:20px 16px;border-bottom:1px solid var(--line);font-weight:900}header span{color:var(--gold)}
+main{max-width:620px;margin:28px auto;padding:0 14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px}
+h1{font-size:22px;margin:0 0 8px}.muted{color:var(--muted);font-size:12px;line-height:2}
+label{display:block;margin:14px 0 6px;color:#e7d7b7;font-size:12px}input,select{width:100%;padding:13px;border-radius:10px;border:1px solid #45616a;background:#0b1d25;color:white;font:inherit}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}button{flex:1;min-width:120px;border:1px solid #587078;background:#1b3740;color:white;padding:13px;border-radius:11px;font:inherit;cursor:pointer}button.primary{background:var(--gold);color:#17252a;border-color:var(--gold);font-weight:bold}button:disabled{opacity:.45;cursor:not-allowed}
+.status{margin-top:16px;padding:13px;border:1px solid var(--line);border-radius:11px;background:#0b1d25;font-size:13px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#d6a34c;margin-left:7px}
+.notice{margin-top:14px;padding:12px;border:1px dashed #8b744c;border-radius:10px;color:#e7d7b7;font-size:11px;line-height:2}
+audio{width:100%;margin-top:12px}a{color:var(--gold)}
+</style></head>
+<body>
+<header>TABRIZ <span>WORLD</span> · تماس صوتی</header>
+<main><section class="card">
+<h1>گفت‌وگوی زنده مشتری و فروشنده</h1>
+<p class="muted">تماس صوتی اینترنتی با میکروفون؛ نه پیام صوتی ضبط‌شده. هر دو نفر باید وارد یک اتاق تماس شوند.</p>
+<label for="room">شناسه اتاق سفارش یا تماس</label><input id="room" placeholder="مثلاً TW-10025" autocomplete="off">
+<label for="role">نقش شما</label><select id="role"><option value="buyer">مشتری</option><option value="seller">فروشنده</option></select>
+<div class="actions"><button id="mic">فعال‌کردن میکروفون</button><button id="join" class="primary" disabled>ورود به تماس</button><button id="hang" disabled>پایان تماس</button></div>
+<div id="status" class="status"><span class="dot"></span>میکروفون هنوز فعال نشده است.</div>
+<audio id="remote" autoplay playsinline></audio>
+<div class="notice">این نسخه رابط اولیه و آزمایش دسترسی میکروفون است. تماس بین دو گوشی تا زمان راه‌اندازی و تنظیم سرور امن Signaling و TURN فعال نمی‌شود. دسترسی میکروفون فقط پس از اجازه شما درخواست می‌شود.</div>
+</section></main>
+<script>
+/* Configure a secure WebSocket signaling endpoint after deploying the backend. */
+const SIGNALING_URL = "";
+const $ = id => document.getElementById(id);
+let localStream=null, socket=null, peer=null, joined=false, makingOffer=false;
+const status = message => $('status').innerHTML='<span class="dot"></span>'+message;
+function send(data){if(socket && socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify(data))}
+$('mic').onclick=async()=>{
+ try{localStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});$('join').disabled=false;$('mic').disabled=true;status('میکروفون آماده است. برای تماس به شناسه اتاق نیاز دارید.')}
+ catch(e){status('دسترسی به میکروفون ممکن نشد: '+(e.name==='NotAllowedError'?'اجازه میکروفون داده نشد.':'لطفاً HTTPS و تنظیمات میکروفون را بررسی کنید.'))}
+};
+async function makePeer(){
+ peer=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
+ localStream.getTracks().forEach(track=>peer.addTrack(track,localStream));
+ peer.ontrack=e=>{$('remote').srcObject=e.streams[0];status('تماس صوتی برقرار شد. صدای طرف مقابل را می‌شنوید.')};
+ peer.onicecandidate=e=>{if(e.candidate)send({type:'ice',candidate:e.candidate})};
+ peer.onconnectionstatechange=()=>{if(peer)status('وضعیت تماس: '+peer.connectionState)};
+ peer.onnegotiationneeded=async()=>{try{makingOffer=true;await peer.setLocalDescription();send({type:'description',description:peer.localDescription})}catch(e){status('خطا در برقراری تماس.')}finally{makingOffer=false}};
+}
+$('join').onclick=()=>{
+ const room=$('room').value.trim();
+ if(!room){status('شناسه اتاق را وارد کنید.');return}
+ if(!SIGNALING_URL){status('سرور تماس هنوز پیکربندی نشده است؛ میکروفون آماده است اما تماس دوطرفه فعال نیست.');return}
+ socket=new WebSocket(SIGNALING_URL);
+ socket.onopen=()=>{send({type:'join',room,role:$('role').value});joined=true;$('join').disabled=true;$('hang').disabled=false;status('به اتاق وصل شدید؛ منتظر ورود طرف مقابل…')};
+ socket.onmessage=async event=>{
+  const m=JSON.parse(event.data);
+  if(m.type==='peer-joined'&&!peer)await makePeer();
+  if(m.type==='description'){
+   if(!peer)await makePeer();
+   const collision=m.description.type==='offer'&&(makingOffer||peer.signalingState!=='stable');
+   if(collision)return;
+   await peer.setRemoteDescription(m.description);
+   if(m.description.type==='offer'){await peer.setLocalDescription();send({type:'description',description:peer.localDescription})}
+  }
+  if(m.type==='ice'&&peer&&m.candidate)try{await peer.addIceCandidate(m.candidate)}catch(e){}
+  if(m.type==='peer-left')status('طرف مقابل از تماس خارج شد.');
+ };
+ socket.onerror=()=>status('اتصال به سرور تماس ناموفق بود.');
+ socket.onclose=()=>{if(joined)status('اتصال تماس قطع شد.')};
+};
+function hangup(){
+ joined=false;if(socket){socket.close();socket=null}if(peer){peer.close();peer=null}
+ if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null}
+ $('remote').srcObject=null;$('mic').disabled=false;$('join').disabled=true;$('hang').disabled=true;
+ status('تماس پایان یافت. برای تماس دوباره میکروفون را فعال کنید.');
+}
+$('hang').onclick=hangup;
+window.addEventListener('beforeunload',()=>{if(socket)socket.close();if(peer)peer.close();if(localStream)localStream.getTracks().forEach(t=>t.stop())});
+</script></body></html>
