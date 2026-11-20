@@ -1,0 +1,53 @@
+name: Build Savash 3-Wave Buyer Demo
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout private source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Create isolated 3-wave demo build
+        run: |
+          test "$(grep -o 'const MAX_WAVE=30;' index.html | wc -l)" -eq 1
+          sed -i 's/const MAX_WAVE=30;/const MAX_WAVE=3;/' index.html
+          sed -i 's/Lead your five-soldier team through 30 increasingly difficult battle waves./Lead your five-soldier team through 3 demo waves./' index.html
+          sed -i 's/"com.savash.game"/"com.savash.demo"/' capacitor.config.json
+          sed -i 's/"Savash"/"Savash Demo"/' capacitor.config.json
+          sed -i 's/SAVASH — Squad Combat/SAVASH Demo — 3 Waves/' manifest.webmanifest
+          sed -i 's/"Savash"/"Savash Demo"/' manifest.webmanifest
+          mkdir -p www/assets
+          cp index.html www/index.html
+          cp manifest.webmanifest www/manifest.webmanifest
+          cp sw.js www/sw.js
+          cp savash-bg.jpg www/savash-bg.jpg
+          cp savash-track-5.mp3 www/savash-track-5.mp3
+          npm install
+          npx cap add android
+          npx cap sync android
+      - name: Build demo APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - name: Upload private-review demo APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Savash-3-Wave-Buyer-Demo
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
