@@ -15,6 +15,7 @@ on:
       - 'capacitor.config.json'
       - 'README.md'
       - 'SALE-HANDOVER.md'
+      - 'SALE-SUMMARY.md'
       - 'ASSET-INVENTORY.md'
       - '.github/workflows/source-package.yml'
   workflow_dispatch:
@@ -42,6 +43,7 @@ jobs:
           git archive --format=zip --prefix=Savash-Source/ HEAD -o dist/Savash-Source.zip
           cp README.md dist/README.md
           cp SALE-HANDOVER.md dist/SALE-HANDOVER.md
+          cp SALE-SUMMARY.md dist/SALE-SUMMARY.md
           cp ASSET-INVENTORY.md dist/ASSET-INVENTORY.md
           sha256sum dist/Savash-Source.zip > dist/SHA256SUMS.txt
       - name: Upload source handover package
