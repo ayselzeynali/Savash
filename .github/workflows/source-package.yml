@@ -1,0 +1,41 @@
+name: Prepare Savash source package
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'SALE-HANDOVER.md'
+      - '.github/workflows/source-package.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout clean main source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Verify excluded project is absent
+        run: |
+          if [ -e TABRIZ-WORLD ]; then
+            echo "TABRIZ-WORLD must not be included in Savash."
+            exit 1
+          fi
+      - name: Prepare source archive
+        run: |
+          mkdir -p dist
+          git archive --format=zip --prefix=Savash-Source/ HEAD -o dist/Savash-Source.zip
+          cp README.md dist/README.md
+          cp SALE-HANDOVER.md dist/SALE-HANDOVER.md
+          sha256sum dist/Savash-Source.zip > dist/SHA256SUMS.txt
+      - name: Upload source handover package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Savash-Source-Handover
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30
