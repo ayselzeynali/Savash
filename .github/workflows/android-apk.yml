@@ -65,13 +65,19 @@ jobs:
           if-no-files-found: error
           retention-days: 14
       - name: Configure release signing
-        if: ${{ secrets.SAVASH_KEYSTORE_BASE64 != '' && secrets.SAVASH_STORE_PASSWORD != '' && secrets.SAVASH_KEY_ALIAS != '' && secrets.SAVASH_KEY_PASSWORD != '' }}
+        id: signing
         env:
           SAVASH_KEYSTORE_BASE64: ${{ secrets.SAVASH_KEYSTORE_BASE64 }}
           SAVASH_STORE_PASSWORD: ${{ secrets.SAVASH_STORE_PASSWORD }}
           SAVASH_KEY_ALIAS: ${{ secrets.SAVASH_KEY_ALIAS }}
           SAVASH_KEY_PASSWORD: ${{ secrets.SAVASH_KEY_PASSWORD }}
         run: |
+          if [ -z "$SAVASH_KEYSTORE_BASE64" ] || [ -z "$SAVASH_STORE_PASSWORD" ] || [ -z "$SAVASH_KEY_ALIAS" ] || [ -z "$SAVASH_KEY_PASSWORD" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Release signing secrets are incomplete; debug APK remains available."
+            exit 0
+          fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
           printf '%s' "$SAVASH_KEYSTORE_BASE64" | base64 --decode > android/app/savash-release.jks
           cat >> android/app/build.gradle <<'EOF'
 
@@ -92,7 +98,7 @@ jobs:
           }
           EOF
       - name: Build signed release APK
-        if: ${{ secrets.SAVASH_KEYSTORE_BASE64 != '' && secrets.SAVASH_STORE_PASSWORD != '' && secrets.SAVASH_KEY_ALIAS != '' && secrets.SAVASH_KEY_PASSWORD != '' }}
+        if: steps.signing.outputs.ready == 'true'
         env:
           SAVASH_STORE_PASSWORD: ${{ secrets.SAVASH_STORE_PASSWORD }}
           SAVASH_KEY_ALIAS: ${{ secrets.SAVASH_KEY_ALIAS }}
@@ -101,7 +107,7 @@ jobs:
           cd android
           ./gradlew assembleRelease
       - name: Upload signed release APK
-        if: ${{ secrets.SAVASH_KEYSTORE_BASE64 != '' && secrets.SAVASH_STORE_PASSWORD != '' && secrets.SAVASH_KEY_ALIAS != '' && secrets.SAVASH_KEY_PASSWORD != '' }}
+        if: steps.signing.outputs.ready == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: Savash-Signed-Release-APK
