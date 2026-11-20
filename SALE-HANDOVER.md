@@ -38,8 +38,8 @@ The Android package uses Capacitor 7 dependencies declared in `package.json`. Th
 ## Current technical status
 - Source contains a 30-wave campaign configuration and boss-wave logic.
 - Mobile movement pad position has been raised in CSS; service-worker cache was advanced to `savash-shell-v9` so clients can fetch updated game files.
-- A fresh Android build for commit `92465b6de701fb629188f0d4cd221c677de27215` is running here: https://github.com/ayselzeynali/Savash/actions/runs/44745929030
-- The latest build must complete and the resulting APK must be installed and tested on a real phone before the product is advertised as device-tested or sale-ready.
+- Android build for commit `92465b6de701fb629188f0d4cd221c677de27215` completed successfully in GitHub Actions run `44745929030`; both debug and signed release APK artifacts were uploaded. The signed release artifact is `Savash-Signed-Release-APK` (3,273,917 bytes; SHA-256 `5f34078aac5424dbabe8ef2d0cf61eb75f92e86e3aa7b4fc987d261dceedd2f1`). Run: https://github.com/ayselzeynali/Savash/actions/runs/44745929030
+- The APK has passed the automated build and signing workflow, but real-phone installation and gameplay acceptance tests are still pending. Do not advertise it as device-tested or fully sale-ready until those tests pass.
 
 ## Pre-sale acceptance checklist
 - [ ] Install the latest signed release APK on a real Android phone.
