@@ -1,7 +1,7 @@
 {
   "name": "SAVASH — Squad Combat",
   "short_name": "Savash",
-  "description": "Lead your five-soldier team through 20 battle waves.",
+  "description": "Lead your five-soldier team through 30 battle waves.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
