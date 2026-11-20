@@ -16,7 +16,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101820;col
 #healthTrack{width:70px;height:7px;background:#ffffff25;border-radius:9px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:4px}
 #healthFill{height:100%;width:100%;background:#52d273;display:block}
 #mission{position:fixed;top:62px;left:50%;transform:translateX(-50%);z-index:2;background:#101820b8;border:1px solid var(--line);padding:6px 12px;border-radius:20px;font-size:11px;white-space:nowrap}
-#pad{position:fixed;left:14px;bottom:calc(24px + env(safe-area-inset-bottom));display:grid;grid-template:repeat(3,48px)/repeat(3,48px);gap:4px;z-index:3}
+#pad{position:fixed;left:14px;bottom:calc(-16px + env(safe-area-inset-bottom));display:grid;grid-template:repeat(3,48px)/repeat(3,48px);gap:4px;z-index:3}
 button{color:#fff;background:#172631eF;border:1px solid #ffffff66;border-radius:12px;font-weight:800;touch-action:none}
 #pad button{font-size:22px}
 #fire{position:fixed;right:18px;bottom:28px;width:84px;height:84px;border-radius:50%;background:linear-gradient(145deg,#ef5555,#8e2020);font-size:16px;z-index:3;box-shadow:0 5px 18px #0008;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
@@ -138,7 +138,18 @@ ctx.fillStyle='#263329';ctx.fillRect(-8,-5,3,8);ctx.fillStyle='#92906a';ctx.fill
 ctx.restore()
 }
 function draw(){ctx.clearRect(0,0,W,H);if(bg.complete&&bg.naturalWidth){let scale=Math.max(W/bg.width,H/bg.height),sw=W/scale,sh=H/scale;ctx.save();ctx.filter='contrast(1.35) saturate(1.28) brightness(.86)';ctx.globalAlpha=.98;ctx.drawImage(bg,(bg.width-sw)/2,(bg.height-sh)/2,sw,sh,0,0,W,H);ctx.restore();ctx.fillStyle='rgba(7,15,9,.18)';ctx.fillRect(0,0,W,H)}else{ctx.fillStyle='#526341';ctx.fillRect(0,0,W,H)}
-ctx.fillStyle='#15251c22';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#ffffff12';for(let x=0;x<W;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+/* richer tactical terrain treatment */
+ctx.fillStyle='rgba(8,20,15,.20)';ctx.fillRect(0,0,W,H);
+const glow=ctx.createRadialGradient(W*.52,H*.43,Math.min(W,H)*.08,W*.52,H*.43,Math.max(W,H)*.78);
+glow.addColorStop(0,'rgba(153,177,91,.10)');glow.addColorStop(.58,'rgba(27,57,37,.06)');glow.addColorStop(1,'rgba(3,12,10,.40)');
+ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+/* irregular moss and earth clearings */
+for(let i=0;i<18;i++){const x=((i*173+47)%997)/997*W,y=((i*239+91)%991)/991*H,rx=24+(i*13)%48,ry=12+(i*7)%25;ctx.fillStyle=i%2?'rgba(139,148,73,.075)':'rgba(12,31,22,.10)';ctx.beginPath();ctx.ellipse(x,y,rx,ry,(i%7)*.31,0,Math.PI*2);ctx.fill()}
+ctx.save();ctx.setLineDash([13,10]);ctx.strokeStyle='rgba(207,190,125,.10)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-20,H*.72);ctx.bezierCurveTo(W*.25,H*.60,W*.30,H*.88,W*.57,H*.69);ctx.bezierCurveTo(W*.78,H*.53,W*.82,H*.78,W+20,H*.58);ctx.stroke();ctx.restore();
+/* subtle tactical grid and corner framing */
+ctx.strokeStyle='rgba(221,231,190,.075)';ctx.lineWidth=1;for(let x=0;x<W;x+=56){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=56){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+ctx.strokeStyle='rgba(222,201,139,.18)';ctx.lineWidth=2;ctx.strokeRect(10,10,W-20,H-20);
+for(let i=0;i<34;i++){const x=((i*137+29)%991)/991*W,y=((i*211+73)%983)/983*H;ctx.strokeStyle='rgba(178,190,132,.22)';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x-4,y+3);ctx.lineTo(x,y-3);ctx.lineTo(x+5,y+2);ctx.stroke()}
 if(mode==='playing'||mode==='result'||mode==='paused'){team.forEach(s=>{if(s.hp>0)soldier(s,'#4e9a54',.86)});soldier(player,'#2f75c8',1.2);enemies.forEach(e=>{soldier(e,e.boss?'#711b25':'#a93636',e.boss?1.45:1);ctx.fillStyle='#222';ctx.fillRect(e.x-15,e.y-27,30,4);ctx.fillStyle=e.boss?'#ffb13b':'#ef4444';ctx.fillRect(e.x-15,e.y-27,30*Math.max(0,e.hp/e.max),4);if(e.boss){ctx.fillStyle='#fff';ctx.font='10px Arial';ctx.textAlign='center';ctx.fillText('BOSS',e.x,e.y-34)}});bullets.forEach(b=>{ctx.fillStyle='#ffe066';ctx.beginPath();ctx.arc(b.x,b.y,4,0,Math.PI*2);ctx.fill()})}}
 function loop(t){let dt=Math.min(.04,(t-last)/1000||0);last=t;update(dt);draw();requestAnimationFrame(loop)}
 addEventListener('keydown',e=>{keys[e.key]=true;if(e.key.startsWith('Arrow'))e.preventDefault();if(e.key==='Escape'&&mode==='playing')pause()});addEventListener('keyup',e=>keys[e.key]=false);
