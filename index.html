@@ -100,7 +100,43 @@ bullets=bullets.filter(b=>b.life>0&&b.x>-20&&b.x<W+20&&b.y>-20&&b.y<H+20);
 let old=enemies.length;enemies=enemies.filter(e=>e.hp>0);kills+=old-enemies.length;
 if(player.hp<=0){player.hp=0;finish(false);return}
 if(enemies.length===0){finish(true);return}hud()}
-function soldier(a,color,scale=1){ctx.save();ctx.translate(a.x,a.y);ctx.scale(scale,scale);ctx.fillStyle='#17212a';ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);ctx.fill();ctx.fillStyle=color;ctx.fillRect(-8,-4,16,18);ctx.fillStyle='#d8b28a';ctx.beginPath();ctx.arc(0,-10,6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#222';ctx.fillRect(4,2,17,3);ctx.restore()}
+function soldier(a,color,scale=1){
+ctx.save();ctx.translate(a.x,a.y);ctx.scale(scale,scale);
+const dark='#101713',edge='#0a100d';
+/* ground shadow */
+ctx.fillStyle='rgba(0,0,0,.42)';ctx.beginPath();ctx.ellipse(1,10,14,7,0,0,Math.PI*2);ctx.fill();
+/* legs and boots */
+ctx.lineCap='round';ctx.lineJoin='round';
+ctx.strokeStyle=dark;ctx.lineWidth=5.5;
+ctx.beginPath();ctx.moveTo(-4,5);ctx.lineTo(-7,14);ctx.moveTo(4,5);ctx.lineTo(7,14);ctx.stroke();
+ctx.fillStyle='#171d18';ctx.fillRect(-10,12,7,4);ctx.fillRect(4,12,7,4);
+/* arms */
+ctx.strokeStyle='#344331';ctx.lineWidth=5;
+ctx.beginPath();ctx.moveTo(-6,-4);ctx.lineTo(-11,3);ctx.moveTo(6,-4);ctx.lineTo(10,1);ctx.stroke();
+/* torso with shaded field uniform */
+const body=ctx.createLinearGradient(-8,-8,8,9);body.addColorStop(0,'#71805a');body.addColorStop(.42,color);body.addColorStop(1,'#263629');
+ctx.fillStyle=body;ctx.strokeStyle=edge;ctx.lineWidth=1.3;
+ctx.beginPath();ctx.moveTo(-6,-8);ctx.lineTo(6,-8);ctx.lineTo(8,5);ctx.lineTo(5,9);ctx.lineTo(-5,9);ctx.lineTo(-8,5);ctx.closePath();ctx.fill();ctx.stroke();
+/* tactical vest */
+ctx.fillStyle='#303b2b';ctx.fillRect(-6,-5,12,11);ctx.strokeStyle='#89916a';ctx.lineWidth=.8;ctx.strokeRect(-6,-5,12,11);
+ctx.fillStyle='#596448';ctx.fillRect(-5,-4,4,4);ctx.fillRect(1,-4,4,4);ctx.fillRect(-4,2,8,2);
+ctx.fillStyle='#b6a46a';ctx.fillRect(-1,-3,2,2);
+/* neck and face */
+ctx.fillStyle='#a77d59';ctx.fillRect(-2,-11,4,4);
+const face=ctx.createRadialGradient(-2,-14,1,0,-12,6);face.addColorStop(0,'#d2ad83');face.addColorStop(1,'#77543c');
+ctx.fillStyle=face;ctx.beginPath();ctx.ellipse(0,-13,5,5.5,0,0,Math.PI*2);ctx.fill();
+/* helmet with rim and highlight */
+const helm=ctx.createLinearGradient(-6,-21,6,-11);helm.addColorStop(0,'#a0a477');helm.addColorStop(.45,'#596847');helm.addColorStop(1,'#263b2b');
+ctx.fillStyle=helm;ctx.strokeStyle='#17251b';ctx.lineWidth=1.2;
+ctx.beginPath();ctx.arc(0,-15,6.2,Math.PI,Math.PI*2);ctx.lineTo(6.5,-13);ctx.quadraticCurveTo(0,-10,-6.5,-13);ctx.closePath();ctx.fill();ctx.stroke();
+ctx.strokeStyle='#c0bd86';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(-1,-16,4.3,Math.PI*1.08,Math.PI*1.78);ctx.stroke();
+/* rifle, angled forward */
+ctx.save();ctx.translate(5,-1);ctx.rotate(-.32);ctx.fillStyle='#171b18';ctx.fillRect(0,-1,15,2.6);ctx.fillStyle='#6b583d';ctx.fillRect(3,-2,5,4);ctx.fillStyle='#a4a18a';ctx.fillRect(12,-1,4,.8);ctx.restore();
+/* equipment straps and radio pack */
+ctx.strokeStyle='#b3a779';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-4,-6);ctx.lineTo(3,5);ctx.stroke();
+ctx.fillStyle='#263329';ctx.fillRect(-8,-5,3,8);ctx.fillStyle='#92906a';ctx.fillRect(-7,-3,1,3);
+ctx.restore()
+}
 function draw(){ctx.clearRect(0,0,W,H);if(bg.complete&&bg.naturalWidth){let scale=Math.max(W/bg.width,H/bg.height),sw=W/scale,sh=H/scale;ctx.save();ctx.filter='contrast(1.35) saturate(1.28) brightness(.86)';ctx.globalAlpha=.98;ctx.drawImage(bg,(bg.width-sw)/2,(bg.height-sh)/2,sw,sh,0,0,W,H);ctx.restore();ctx.fillStyle='rgba(7,15,9,.18)';ctx.fillRect(0,0,W,H)}else{ctx.fillStyle='#526341';ctx.fillRect(0,0,W,H)}
 ctx.fillStyle='#15251c22';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#ffffff12';for(let x=0;x<W;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
 if(mode==='playing'||mode==='result'||mode==='paused'){team.forEach(s=>{if(s.hp>0)soldier(s,'#4e9a54',.86)});soldier(player,'#2f75c8',1.2);enemies.forEach(e=>{soldier(e,e.boss?'#711b25':'#a93636',e.boss?1.45:1);ctx.fillStyle='#222';ctx.fillRect(e.x-15,e.y-27,30,4);ctx.fillStyle=e.boss?'#ffb13b':'#ef4444';ctx.fillRect(e.x-15,e.y-27,30*Math.max(0,e.hp/e.max),4);if(e.boss){ctx.fillStyle='#fff';ctx.font='10px Arial';ctx.textAlign='center';ctx.fillText('BOSS',e.x,e.y-34)}});bullets.forEach(b=>{ctx.fillStyle='#ffe066';ctx.beginPath();ctx.arc(b.x,b.y,4,0,Math.PI*2);ctx.fill()})}}
