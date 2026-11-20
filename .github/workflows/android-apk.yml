@@ -52,17 +52,26 @@ jobs:
         run: npx cap add android
       - name: Sync Capacitor
         run: npx cap sync android
+      - name: Build debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Savash-Debug-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
       - name: Configure release signing
+        if: ${{ secrets.SAVASH_KEYSTORE_BASE64 != '' && secrets.SAVASH_STORE_PASSWORD != '' && secrets.SAVASH_KEY_ALIAS != '' && secrets.SAVASH_KEY_PASSWORD != '' }}
         env:
           SAVASH_KEYSTORE_BASE64: ${{ secrets.SAVASH_KEYSTORE_BASE64 }}
           SAVASH_STORE_PASSWORD: ${{ secrets.SAVASH_STORE_PASSWORD }}
           SAVASH_KEY_ALIAS: ${{ secrets.SAVASH_KEY_ALIAS }}
           SAVASH_KEY_PASSWORD: ${{ secrets.SAVASH_KEY_PASSWORD }}
         run: |
-          test -n "$SAVASH_KEYSTORE_BASE64"
-          test -n "$SAVASH_STORE_PASSWORD"
-          test -n "$SAVASH_KEY_ALIAS"
-          test -n "$SAVASH_KEY_PASSWORD"
           printf '%s' "$SAVASH_KEYSTORE_BASE64" | base64 --decode > android/app/savash-release.jks
           cat >> android/app/build.gradle <<'EOF'
 
@@ -83,17 +92,19 @@ jobs:
           }
           EOF
       - name: Build signed release APK
+        if: ${{ secrets.SAVASH_KEYSTORE_BASE64 != '' && secrets.SAVASH_STORE_PASSWORD != '' && secrets.SAVASH_KEY_ALIAS != '' && secrets.SAVASH_KEY_PASSWORD != '' }}
         env:
           SAVASH_STORE_PASSWORD: ${{ secrets.SAVASH_STORE_PASSWORD }}
           SAVASH_KEY_ALIAS: ${{ secrets.SAVASH_KEY_ALIAS }}
           SAVASH_KEY_PASSWORD: ${{ secrets.SAVASH_KEY_PASSWORD }}
         run: |
           cd android
-          chmod +x gradlew
           ./gradlew assembleRelease
-      - name: Upload signed APK
+      - name: Upload signed release APK
+        if: ${{ secrets.SAVASH_KEYSTORE_BASE64 != '' && secrets.SAVASH_STORE_PASSWORD != '' && secrets.SAVASH_KEY_ALIAS != '' && secrets.SAVASH_KEY_PASSWORD != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: Savash-Signed-Release-APK
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
+          retention-days: 30
