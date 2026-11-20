@@ -16,7 +16,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101820;col
 #healthTrack{width:70px;height:7px;background:#ffffff25;border-radius:9px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:4px}
 #healthFill{height:100%;width:100%;background:#52d273;display:block}
 #mission{position:fixed;top:62px;left:50%;transform:translateX(-50%);z-index:2;background:#101820b8;border:1px solid var(--line);padding:6px 12px;border-radius:20px;font-size:11px;white-space:nowrap}
-#pad{position:fixed;left:14px;bottom:calc(108px + env(safe-area-inset-bottom));display:grid;grid-template:repeat(3,48px)/repeat(3,48px);gap:4px;z-index:3}
+#pad{position:fixed;left:14px;bottom:calc(180px + env(safe-area-inset-bottom));display:grid;grid-template:repeat(3,48px)/repeat(3,48px);gap:4px;z-index:3}
 button{color:#fff;background:#172631eF;border:1px solid #ffffff66;border-radius:12px;font-weight:800;touch-action:none}
 #pad button{font-size:22px}
 #fire{position:fixed;right:18px;bottom:28px;width:84px;height:84px;border-radius:50%;background:linear-gradient(145deg,#ef5555,#8e2020);font-size:16px;z-index:3;box-shadow:0 5px 18px #0008;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
@@ -32,7 +32,7 @@ button{color:#fff;background:#172631eF;border:1px solid #ffffff66;border-radius:
 #resultTitle{font-size:25px;margin:0 0 10px;color:var(--gold)}
 #resultText{color:#d5dce0;line-height:1.5}
 .hidden{display:none!important}
-@media(min-width:800px){#pad{left:28px;bottom:28px}#fire{right:35px;bottom:35px;width:96px;height:96px}}
+@media(min-width:800px) and (hover:hover) and (pointer:fine){#pad{left:28px;bottom:28px}#fire{right:35px;bottom:35px;width:96px;height:96px}}
 </style>
 </head>
 <body>
